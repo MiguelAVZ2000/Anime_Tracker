@@ -15,28 +15,27 @@ import {
   Bell,
   Sparkles,
 } from "lucide-react"
-
-
-import { getUserStats, getCurrentlyWatching, getCurrentlyReading, getRecentActivity, getUpcomingReleases } from "@/lib/data";
-
-
-
-import { getUserStats, getCurrentlyWatching, getCurrentlyReading, getRecentActivity, getUpcomingReleases } from "@/lib/data";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
-  const userStats = await getUserStats();
+  const userStatsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/user-stats`);
+  const userStats = userStatsResponse.ok ? await userStatsResponse.json() : null;
 
   if (!userStats) {
     redirect("/login");
   }
 
-  const [currentlyWatching, currentlyReading, recentActivity, upcomingReleases] = await Promise.all([
-    getCurrentlyWatching(),
-    getCurrentlyReading(),
-    getRecentActivity(),
-    getUpcomingReleases(),
+  const [currentlyWatchingResponse, currentlyReadingResponse, recentActivityResponse, upcomingReleasesResponse] = await Promise.all([
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/currently-watching`),
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/currently-reading`),
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/recent-activity`),
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/upcoming-releases`),
   ]);
+
+  const currentlyWatching = currentlyWatchingResponse.ok ? await currentlyWatchingResponse.json() : [];
+  const currentlyReading = currentlyReadingResponse.ok ? await currentlyReadingResponse.json() : [];
+  const recentActivity = recentActivityResponse.ok ? await recentActivityResponse.json() : [];
+  const upcomingReleases = upcomingReleasesResponse.ok ? await upcomingReleasesResponse.json() : [];
 
 
   return (

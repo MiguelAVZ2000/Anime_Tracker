@@ -1,442 +1,194 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import Link from "next/link"
-import { Play, Star, Search, SlidersHorizontal } from "lucide-react"
+import { useState, useEffect, FormEvent } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Search, Tv, Film, Book } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
-// Mock search results
-const allResults = [
-  {
-    id: 1,
-    title: "Attack on Titan",
-    image: "/attack-on-titan-poster.jpg",
-    rating: 9.0,
-    status: "Completed",
-    episodes: 87,
-    type: "anime",
-    genres: ["Action", "Drama", "Fantasy"],
-    year: 2013,
-  },
-  {
-    id: 2,
-    title: "Demon Slayer",
-    image: "/demon-slayer-anime-poster.png",
-    rating: 8.7,
-    status: "Ongoing",
-    episodes: 55,
-    type: "anime",
-    genres: ["Action", "Supernatural"],
-    year: 2019,
-  },
-  {
-    id: 3,
-    title: "Jujutsu Kaisen",
-    image: "/jujutsu-kaisen-poster.png",
-    rating: 8.6,
-    status: "Ongoing",
-    episodes: 47,
-    type: "anime",
-    genres: ["Action", "Supernatural"],
-    year: 2020,
-  },
-  {
-    id: 4,
-    title: "One Piece",
-    image: "/anime-poster.png",
-    rating: 8.9,
-    status: "Ongoing",
-    episodes: 1100,
-    type: "anime",
-    genres: ["Action", "Adventure", "Comedy"],
-    year: 1999,
-  },
-  {
-    id: 5,
-    title: "My Hero Academia",
-    image: "/my-hero-academia-poster.png",
-    rating: 8.4,
-    status: "Ongoing",
-    episodes: 138,
-    type: "anime",
-    genres: ["Action", "Comedy"],
-    year: 2016,
-  },
-  {
-    id: 6,
-    title: "Chainsaw Man",
-    image: "/chainsaw-man-anime-poster.png",
-    rating: 8.5,
-    status: "Completed",
-    episodes: 12,
-    type: "anime",
-    genres: ["Action", "Horror"],
-    year: 2022,
-  },
-  {
-    id: 7,
-    title: "Berserk",
-    image: "/berserk-manga-cover.jpg",
-    rating: 9.1,
-    status: "Publishing",
-    chapters: 374,
-    type: "manga",
-    genres: ["Action", "Drama", "Fantasy", "Horror"],
-    year: 1989,
-  },
-  {
-    id: 8,
-    title: "One Punch Man",
-    image: "/one-punch-man-manga-cover.png",
-    rating: 8.7,
-    status: "Publishing",
-    chapters: 195,
-    type: "manga",
-    genres: ["Action", "Comedy"],
-    year: 2009,
-  },
-  {
-    id: 9,
-    title: "Tokyo Ghoul",
-    image: "/tokyo-ghoul-manga-cover.jpg",
-    rating: 8.3,
-    status: "Completed",
-    chapters: 143,
-    type: "manga",
-    genres: ["Action", "Horror", "Supernatural"],
-    year: 2011,
-  },
-  {
-    id: 10,
-    title: "Vinland Saga",
-    image: "/vinland-saga-manga-cover.jpg",
-    rating: 8.8,
-    status: "Publishing",
-    chapters: 207,
-    type: "manga",
-    genres: ["Action", "Adventure", "Drama"],
-    year: 2005,
-  },
-  {
-    id: 11,
-    title: "Frieren: Beyond Journey's End",
-    image: "/frieren-anime-poster.jpg",
-    rating: 9.0,
-    status: "Ongoing",
-    episodes: 28,
-    type: "anime",
-    genres: ["Adventure", "Drama", "Fantasy"],
-    year: 2023,
-  },
-  {
-    id: 12,
-    title: "Spy x Family",
-    image: "/spy-family-poster.png",
-    rating: 8.5,
-    status: "Ongoing",
-    episodes: 25,
-    type: "anime",
-    genres: ["Action", "Comedy"],
-    year: 2022,
-  },
-]
+interface MediaItem {
+  mal_id: number;
+  title: string;
+  images: {
+    jpg: {
+      large_image_url: string;
+    };
+  };
+  episodes?: number; // Opcional para manga
+  chapters?: number; // Opcional para anime
+  score: number;
+  type: string;
+}
+
+interface PaginationInfo {
+  last_visible_page: number;
+  has_next_page: boolean;
+  current_page: number;
+}
 
 export default function SearchPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [typeFilter, setTypeFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [genreFilter, setGenreFilter] = useState("all")
-  const [sortBy, setSortBy] = useState("rating")
-  const [showFilters, setShowFilters] = useState(false)
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<MediaItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searchType, setSearchType] = useState<"anime" | "manga">("anime");
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Filter and sort results
-  const filteredResults = allResults
-    .filter((item) => {
-      const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesType = typeFilter === "all" || item.type === typeFilter
-      const matchesStatus = statusFilter === "all" || item.status.toLowerCase().includes(statusFilter.toLowerCase())
-      const matchesGenre =
-        genreFilter === "all" || item.genres.some((g) => g.toLowerCase() === genreFilter.toLowerCase())
-      return matchesSearch && matchesType && matchesStatus && matchesGenre
-    })
-    .sort((a, b) => {
-      if (sortBy === "rating") return b.rating - a.rating
-      if (sortBy === "title") return a.title.localeCompare(b.title)
-      if (sortBy === "year") return b.year - a.year
-      return 0
-    })
+  const apiEndpoints = {
+    anime: { search: "/api/anime/search", top: "/api/anime/top" },
+    manga: { search: "/api/manga/search", top: "/api/manga/top" },
+  };
 
-  const allGenres = Array.from(new Set(allResults.flatMap((item) => item.genres))).sort()
+  const performFetch = async (url: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("La solicitud falló");
+      }
+      const data = await response.json();
+      setResults(data.data || []);
+      setPagination(data.pagination || null);
+    } catch (err: any) {
+      setError(err.message);
+      setResults([]);
+      setPagination(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = async (e?: FormEvent<HTMLFormElement>, page: number = 1) => {
+    if (e) e.preventDefault();
+    if (!query) return;
+    setCurrentPage(page);
+    const url = `${apiEndpoints[searchType].search}?q=${encodeURIComponent(query)}&page=${page}`;
+    performFetch(url);
+  };
+
+  useEffect(() => {
+    const fetchTopContent = (page: number = 1) => {
+      setCurrentPage(page);
+      const url = `${apiEndpoints[searchType].top}?page=${page}`;
+      performFetch(url);
+    };
+    fetchTopContent(currentPage);
+  }, [searchType, currentPage]);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Play className="h-8 w-8 text-primary" />
-              <Link href="/">
-                <h1 className="text-2xl font-bold text-foreground">AnimeTracker</h1>
-              </Link>
-            </div>
-            <nav className="flex items-center gap-4">
-              <Link href="/dashboard">
-                <Button variant="ghost">Dashboard</Button>
-              </Link>
-              <Link href="/search">
-                <Button variant="ghost">Search</Button>
-              </Link>
-              <Link href="/profile">
-                <Button variant="outline">Profile</Button>
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-4 py-8">
-        {/* Search Header */}
-        <div className="mb-8">
-          <h2 className="text-4xl font-bold text-foreground mb-2">Search Anime & Manga</h2>
-          <p className="text-muted-foreground text-lg">Discover your next favorite series</p>
-        </div>
-
-        {/* Search Bar */}
-        <div className="mb-6">
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search for anime or manga..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-12 text-lg"
-              />
-            </div>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2"
-            >
-              <SlidersHorizontal className="h-5 w-5" />
-              Filters
-            </Button>
-          </div>
-        </div>
-
-        {/* Filters */}
-        {showFilters && (
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Type</label>
-                  <Select value={typeFilter} onValueChange={setTypeFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Types</SelectItem>
-                      <SelectItem value="anime">Anime</SelectItem>
-                      <SelectItem value="manga">Manga</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Status</label>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="ongoing">Ongoing</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="publishing">Publishing</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Genre</label>
-                  <Select value={genreFilter} onValueChange={setGenreFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Genres</SelectItem>
-                      {allGenres.map((genre) => (
-                        <SelectItem key={genre} value={genre.toLowerCase()}>
-                          {genre}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Sort By</label>
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="rating">Rating</SelectItem>
-                      <SelectItem value="title">Title</SelectItem>
-                      <SelectItem value="year">Year</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="mt-4 flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Showing {filteredResults.length} of {allResults.length} results
-                </p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setTypeFilter("all")
-                    setStatusFilter("all")
-                    setGenreFilter("all")
-                    setSortBy("rating")
-                    setSearchQuery("")
-                  }}
-                >
-                  Clear Filters
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Quick Filters */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <Button variant={typeFilter === "all" ? "default" : "outline"} size="sm" onClick={() => setTypeFilter("all")}>
-            All
-          </Button>
-          <Button
-            variant={typeFilter === "anime" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setTypeFilter("anime")}
-          >
-            Anime
-          </Button>
-          <Button
-            variant={typeFilter === "manga" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setTypeFilter("manga")}
-          >
-            Manga
-          </Button>
-          <div className="w-px h-8 bg-border mx-2" />
-          <Button
-            variant={genreFilter === "action" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setGenreFilter(genreFilter === "action" ? "all" : "action")}
-          >
-            Action
-          </Button>
-          <Button
-            variant={genreFilter === "comedy" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setGenreFilter(genreFilter === "comedy" ? "all" : "comedy")}
-          >
-            Comedy
-          </Button>
-          <Button
-            variant={genreFilter === "drama" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setGenreFilter(genreFilter === "drama" ? "all" : "drama")}
-          >
-            Drama
-          </Button>
-          <Button
-            variant={genreFilter === "fantasy" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setGenreFilter(genreFilter === "fantasy" ? "all" : "fantasy")}
-          >
-            Fantasy
-          </Button>
-        </div>
-
-        {/* Results Grid */}
-        {filteredResults.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-            {filteredResults.map((item) => (
-              <Link key={item.id} href={`/${item.type}/${item.id}`}>
-                <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden">
-                  <div className="relative aspect-[3/4]">
-                    <img
-                      src={item.image || "/placeholder.svg"}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-2 right-2">
-                      <Badge className="bg-primary text-primary-foreground">
-                        <Star className="h-3 w-3 mr-1" />
-                        {item.rating}
-                      </Badge>
-                    </div>
-                    <div className="absolute top-2 left-2">
-                      <Badge variant="secondary" className="capitalize">
-                        {item.type}
-                      </Badge>
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="absolute bottom-0 left-0 right-0 p-3">
-                        <p className="text-white text-sm font-medium">
-                          {item.type === "anime" ? `${item.episodes} Episodes` : `${item.chapters} Chapters`}
-                        </p>
-                        <Badge variant="secondary" className="mt-1">
-                          {item.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                  <CardContent className="p-3">
-                    <h4 className="font-semibold text-sm text-foreground line-clamp-2 text-balance">{item.title}</h4>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {item.genres.slice(0, 2).map((genre) => (
-                        <Badge key={genre} variant="outline" className="text-xs">
-                          {genre}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <Card className="p-12">
-            <div className="text-center">
-              <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-foreground mb-2">No results found</h3>
-              <p className="text-muted-foreground mb-4">Try adjusting your search or filters</p>
-              <Button
-                onClick={() => {
-                  setSearchQuery("")
-                  setTypeFilter("all")
-                  setStatusFilter("all")
-                  setGenreFilter("all")
-                }}
-              >
-                Clear All Filters
-              </Button>
-            </div>
-          </Card>
-        )}
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-foreground mb-2">Buscar</h1>
+        <p className="text-muted-foreground">Encuentra tu próximo anime o manga favorito.</p>
       </div>
+
+      <Tabs
+        value={searchType}
+        onValueChange={(value) => {
+          setSearchType(value as "anime" | "manga");
+          setCurrentPage(1); // Reset page on type change
+          setQuery(""); // Reset query
+        }}
+        className="mb-8"
+      >
+        <TabsList>
+          <TabsTrigger value="anime">Anime</TabsTrigger>
+          <TabsTrigger value="manga">Manga</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <form onSubmit={handleSearch} className="flex items-center gap-2 mb-8">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder={`Buscar ${searchType} por nombre...`}
+            className="pl-10"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+        <Button type="submit" disabled={loading}>
+          {loading ? "Buscando..." : "Buscar"}
+        </Button>
+      </form>
+
+      {error && <p className="text-destructive text-center">{error}</p>}
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {results.map((item) => (
+          <Link href={`/${searchType}/${item.mal_id}`} key={item.mal_id}>
+            <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
+              <CardContent className="p-0">
+                <Image
+                  src={item.images.jpg.large_image_url}
+                  alt={item.title}
+                  width={225}
+                  height={320}
+                  className="w-full h-auto object-cover"
+                />
+              </CardContent>
+              <CardHeader className="p-3 flex-grow">
+                <CardTitle className="text-sm font-semibold leading-tight" title={item.title}>
+                  {item.title}
+                </CardTitle>
+              </CardHeader>
+              <CardFooter className="p-3 flex justify-between items-center text-xs text-muted-foreground mt-auto">
+                <div className="flex items-center gap-1">
+                  {item.type === "TV" && <Tv className="h-3 w-3" />}
+                  {(item.type === "Movie" || item.type === "OVA" || item.type === "Special") && <Film className="h-3 w-3" />}
+                  {searchType === "manga" && <Book className="h-3 w-3" />}
+                  <span>{item.episodes ? `${item.episodes} ep.` : item.chapters ? `${item.chapters} cap.` : 'N/A'}</span>
+                </div>
+                {item.score && (
+                  <Badge variant="secondary" className="text-xs">
+                    ⭐ {item.score}
+                  </Badge>
+                )}
+              </CardFooter>
+            </Card>
+          </Link>
+        ))}
+      </div>
+
+      {pagination && (pagination.has_next_page || pagination.current_page > 1) && (
+        <Pagination className="mt-8">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage > 1) setCurrentPage(currentPage - 1);
+                }}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => { e.preventDefault(); if (pagination.has_next_page) setCurrentPage(currentPage + 1); }}
+                className={!pagination.has_next_page ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
+
+      {loading && <p className="text-center mt-8">Cargando más resultados...</p>}
     </div>
-  )
+  );
 }
