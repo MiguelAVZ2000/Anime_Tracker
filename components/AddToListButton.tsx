@@ -11,6 +11,8 @@ interface AddToListButtonProps {
     title: string;
     image: string;
     type: string;
+    totalEpisodes?: number;
+    totalChapters?: number;
   };
   mediaType: 'anime' | 'manga';
 }

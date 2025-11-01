@@ -25,6 +25,7 @@ export default async function MangaDetailsPage({ params }: MangaDetailsPageProps
     title: manga.title,
     image: manga.images.jpg.large_image_url,
     type: manga.type,
+    totalChapters: manga.chapters,
   };
 
   return (

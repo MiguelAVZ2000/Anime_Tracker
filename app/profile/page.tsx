@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UserLists from "@/components/UserLists";
+import UserStats from "@/components/UserStats";
 import dbConnect from "@/lib/dbConnect";
 import AnimeEntry from "@/models/AnimeEntry";
 import MangaEntry from "@/models/MangaEntry";
@@ -42,6 +43,9 @@ export default async function ProfilePage() {
           <p className="text-muted-foreground">{session.user.email}</p>
         </div>
       </div>
+
+      {/* Pasamos las listas al componente de estadísticas */}
+      <UserStats animeList={animeList} mangaList={mangaList} />
 
       {/* Pasamos las listas al componente cliente */}
       <UserLists initialAnimeList={animeList} initialMangaList={mangaList} />

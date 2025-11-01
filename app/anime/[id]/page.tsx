@@ -25,6 +25,7 @@ export default async function AnimeDetailsPage({ params }: AnimeDetailsPageProps
     title: anime.title,
     image: anime.images.jpg.large_image_url,
     type: anime.type,
+    totalEpisodes: anime.episodes,
   };
 
   return (
