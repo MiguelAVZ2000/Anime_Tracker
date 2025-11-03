@@ -5,6 +5,7 @@ import { Star, Tv, Film, Calendar, Clapperboard, Book, Users, BarChart } from "l
 import AddToListButton from "@/components/AddToListButton";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.config";
+import ReviewsSection from "@/components/ReviewsSection";
 
 interface AnimeDetailsPageProps {
   params: {
@@ -91,6 +92,8 @@ export default async function AnimeDetailsPage({ params }: AnimeDetailsPageProps
           )}
         </div>
       </div>
+
+      <ReviewsSection mediaId={anime.mal_id} mediaType="anime" />
     </div>
   );
 }

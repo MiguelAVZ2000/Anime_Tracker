@@ -5,6 +5,7 @@ import { Star, Book, Calendar, Users, BarChart, PenSquare } from "lucide-react";
 import AddToListButton from "@/components/AddToListButton";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.config";
+import ReviewsSection from "@/components/ReviewsSection";
 
 interface MangaDetailsPageProps {
   params: {
@@ -85,6 +86,8 @@ export default async function MangaDetailsPage({ params }: MangaDetailsPageProps
 
         </div>
       </div>
+
+      <ReviewsSection mediaId={manga.mal_id} mediaType="manga" />
     </div>
   );
 }
