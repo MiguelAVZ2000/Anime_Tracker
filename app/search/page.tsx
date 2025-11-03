@@ -3,8 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Tv, Film, Book } from "lucide-react";
+import { Search } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -13,9 +12,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
+import MediaCard from "@/components/MediaCard";
 
 interface MediaItem {
   mal_id: number;
@@ -130,37 +127,9 @@ export default function SearchPage() {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {results.map((item) => (
-          <Link href={`/${searchType}/${item.mal_id}`} key={item.mal_id}>
-            <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
-              <CardContent className="p-0">
-                <Image
-                  src={item.images.jpg.large_image_url}
-                  alt={item.title}
-                  width={225}
-                  height={320}
-                  className="w-full h-auto object-cover"
-                />
-              </CardContent>
-              <CardHeader className="p-3 flex-grow">
-                <CardTitle className="text-sm font-semibold leading-tight" title={item.title}>
-                  {item.title}
-                </CardTitle>
-              </CardHeader>
-              <CardFooter className="p-3 flex justify-between items-center text-xs text-muted-foreground mt-auto">
-                <div className="flex items-center gap-1">
-                  {item.type === "TV" && <Tv className="h-3 w-3" />}
-                  {(item.type === "Movie" || item.type === "OVA" || item.type === "Special") && <Film className="h-3 w-3" />}
-                  {searchType === "manga" && <Book className="h-3 w-3" />}
-                  <span>{item.episodes ? `${item.episodes} ep.` : item.chapters ? `${item.chapters} cap.` : 'N/A'}</span>
-                </div>
-                {item.score && (
-                  <Badge variant="secondary" className="text-xs">
-                    ⭐ {item.score}
-                  </Badge>
-                )}
-              </CardFooter>
-            </Card>
-          </Link>
+          <div key={item.mal_id}>
+            <MediaCard item={item} mediaType={searchType} />
+          </div>
         ))}
       </div>
 

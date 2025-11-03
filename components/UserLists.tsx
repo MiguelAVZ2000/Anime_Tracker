@@ -3,11 +3,12 @@
 import { useState, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
 import EditEntryControls from "./EditEntryControls";
-import { IAnimeEntry } from "@/models/AnimeEntry";
+import { IAnimeEntry } from "@/models/AnimeEntry"; // Asegúrate que la ruta sea correcta
 import { IMangaEntry } from "@/models/MangaEntry";
 
 interface UserListsProps {
@@ -45,6 +46,12 @@ function ListGrid({
     return <p className="text-muted-foreground text-center py-8">No hay nada en esta lista todavía.</p>;
   }
 
+  const getProgressPercentage = (item: MediaEntry) => {
+    const total = mediaType === 'anime' ? item.totalEpisodes : item.totalChapters;
+    if (!total || total === 0) return 0;
+    return (item.progress / total) * 100;
+  };
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
       {items.map((item) => (
@@ -56,7 +63,7 @@ function ListGrid({
                 alt={item.title}
                 width={225}
                 height={320}
-                className="w-full h-auto object-cover aspect-[225/320]"
+                className="w-full h-auto object-cover"
               />
               <Badge className="absolute top-2 right-2">{item.score > 0 ? `⭐ ${item.score}` : 'Sin nota'}</Badge>
             </CardContent>
@@ -72,6 +79,12 @@ function ListGrid({
             <Badge variant="secondary" className="text-xs">{statusMap[mediaType][item.status as keyof typeof statusMap.anime]}</Badge>
             <EditEntryControls item={item} mediaType={mediaType} onUpdate={onUpdate} />
           </CardFooter>
+          {(item.status === 'watching' || item.status === 'reading') && (item.totalEpisodes || item.totalChapters) ? (
+            <div className="px-3 pb-3">
+              <Progress value={getProgressPercentage(item)} className="h-1.5" />
+              <p className="text-xs text-muted-foreground text-right mt-1">{item.progress} / {mediaType === 'anime' ? item.totalEpisodes : item.totalChapters}</p>
+            </div>
+          ) : null}
         </Card>
       ))}
     </div>
@@ -85,7 +98,7 @@ export default function UserLists({ initialAnimeList, initialMangaList }: UserLi
   const [activeMangaTab, setMangaTab] = useState("all");
 
   const handleUpdateEntry = (updatedEntry: MediaEntry) => {
-    if ('progress' in updatedEntry && typeof updatedEntry.progress === 'number') { // Es AnimeEntry
+    if ('totalEpisodes' in updatedEntry) { // Es AnimeEntry
       setAnimeList(prev => prev.map(item => item._id === updatedEntry._id ? updatedEntry : item));
     } else { // Es MangaEntry
       setMangaList(prev => prev.map(item => item._id === updatedEntry._id ? updatedEntry : item));
@@ -115,7 +128,7 @@ export default function UserLists({ initialAnimeList, initialMangaList }: UserLi
               <TabsTrigger key={key} value={key}>{value}</TabsTrigger>
             ))}
           </TabsList>
-          <ListGrid items={filteredAnime} mediaType="anime" />
+          <ListGrid items={filteredAnime} mediaType="anime" onUpdate={handleUpdateEntry} />
         </Tabs>
       </TabsContent>
       <TabsContent value="manga">
@@ -125,7 +138,7 @@ export default function UserLists({ initialAnimeList, initialMangaList }: UserLi
               <TabsTrigger key={key} value={key}>{value}</TabsTrigger>
             ))}
           </TabsList>
-          <ListGrid items={filteredManga} mediaType="manga" />
+          <ListGrid items={filteredManga} mediaType="manga" onUpdate={handleUpdateEntry} />
         </Tabs>
       </TabsContent>
     </Tabs>

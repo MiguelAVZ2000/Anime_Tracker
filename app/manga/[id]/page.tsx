@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Star, Book, Calendar, Users, BarChart, PenSquare } from "lucide-react";
 import AddToListButton from "@/components/AddToListButton";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/auth.config";
 
 interface MangaDetailsPageProps {
   params: {

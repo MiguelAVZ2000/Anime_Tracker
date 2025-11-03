@@ -1,114 +1,60 @@
-"use client"
-
-import { useState } from "react"
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Trophy, Star, Flame, Target, Users, Calendar, Award, Lock } from "lucide-react"
+import { Trophy, Star, Target, Award, Lock } from "lucide-react"
+import { Achievement, achievementsList } from "@/lib/achievements";
 
-const achievements = [
-  {
-    id: 1,
-    title: "Primer Paso",
-    description: "Completa tu primer anime",
-    icon: Star,
-    progress: 100,
-    unlocked: true,
-    rarity: "common",
-    points: 10,
-  },
-  {
-    id: 2,
-    title: "Maratonista",
-    description: "Ve 10 episodios en un día",
-    icon: Flame,
-    progress: 100,
-    unlocked: true,
-    rarity: "rare",
-    points: 25,
-  },
-  {
-    id: 3,
-    title: "Coleccionista",
-    description: "Añade 50 títulos a tu lista",
-    icon: Trophy,
-    progress: 76,
-    unlocked: false,
-    rarity: "epic",
-    points: 50,
-  },
-  {
-    id: 4,
-    title: "Crítico Experto",
-    description: "Escribe 20 reseñas",
-    icon: Award,
-    progress: 45,
-    unlocked: false,
-    rarity: "rare",
-    points: 30,
-  },
-  {
-    id: 5,
-    title: "Social Butterfly",
-    description: "Consigue 100 seguidores",
-    icon: Users,
-    progress: 62,
-    unlocked: false,
-    rarity: "epic",
-    points: 40,
-  },
-  {
-    id: 6,
-    title: "Dedicación Total",
-    description: "Usa la app durante 365 días consecutivos",
-    icon: Calendar,
-    progress: 28,
-    unlocked: false,
-    rarity: "legendary",
-    points: 100,
-  },
-]
+interface AchievementStatus extends Achievement {
+  unlocked: boolean;
+  progress: number;
+}
 
-const challenges = [
-  {
-    id: 1,
-    title: "Maratón de Shonen",
-    description: "Completa 5 animes de género Shonen este mes",
-    progress: 3,
-    total: 5,
-    timeLeft: "12 días",
-    reward: "50 puntos + Badge exclusivo",
-  },
-  {
-    id: 2,
-    title: "Explorador de Géneros",
-    description: "Ve al menos un anime de 5 géneros diferentes",
-    progress: 2,
-    total: 5,
-    timeLeft: "20 días",
-    reward: "30 puntos",
-  },
-  {
-    id: 3,
-    title: "Lector Veloz",
-    description: "Lee 100 capítulos de manga esta semana",
-    progress: 45,
-    total: 100,
-    timeLeft: "3 días",
-    reward: "40 puntos",
-  },
-]
+async function getAchievementsStatus(): Promise<AchievementStatus[]> {
+  // En una aplicación real, esto sería una llamada a nuestra API interna
+  // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/achievements`);
+  // const data = await res.json();
+  // return data;
+
+  // Simulación de la llamada a la API para este ejemplo
+  const { default: dbConnect } = await import("@/lib/dbConnect");
+  const { default: User } = await import("@/models/User");
+  const { default: AnimeEntry } = await import("@/models/AnimeEntry");
+  const { default: MangaEntry } = await import("@/models/MangaEntry");
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return [];
+
+  await dbConnect();
+  const user = await User.findById(session.user.id).lean();
+  const animeList = await AnimeEntry.find({ userId: session.user.id }).lean();
+  const mangaList = await MangaEntry.find({ userId: session.user.id }).lean();
+  const userAchievements = user?.unlockedAchievements?.map(a => a.achievementId) || [];
+
+  return achievementsList.map(ach => {
+    const unlocked = userAchievements.includes(ach.id);
+    // El progreso real se podría calcular aquí si la lógica fuera más compleja
+    const progress = unlocked ? 100 : 0;
+    return { ...ach, unlocked, progress };
+  });
+}
 
 const rarityColors = {
   common: "bg-gray-500",
   rare: "bg-blue-500",
   epic: "bg-purple-500",
-  legendary: "bg-orange-500",
+  legendary: "bg-yellow-500",
 }
 
-export default function AchievementsPage() {
-  const [filter, setFilter] = useState("all")
+export default async function AchievementsPage() {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    redirect("/login");
+  }
+
+  const achievements = await getAchievementsStatus();
 
   const totalPoints = achievements.filter((a) => a.unlocked).reduce((sum, a) => sum + a.points, 0)
   const unlockedCount = achievements.filter((a) => a.unlocked).length
@@ -142,17 +88,6 @@ export default function AchievementsPage() {
               <div>
                 <p className="text-3xl font-bold">{totalPoints}</p>
                 <p className="text-sm text-muted-foreground">Puntos Totales</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-accent/10 to-accent/5">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <Target className="h-10 w-10 text-accent" />
-              <div>
-                <p className="text-3xl font-bold">{challenges.length}</p>
-                <p className="text-sm text-muted-foreground">Retos Activos</p>
               </div>
             </div>
           </CardContent>
@@ -209,38 +144,6 @@ export default function AchievementsPage() {
               )
             })}
           </div>
-        </TabsContent>
-
-        <TabsContent value="challenges" className="space-y-4">
-          {challenges.map((challenge) => (
-            <Card key={challenge.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle>{challenge.title}</CardTitle>
-                    <CardDescription>{challenge.description}</CardDescription>
-                  </div>
-                  <Badge variant="outline">{challenge.timeLeft}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-muted-foreground">Progreso</span>
-                    <span className="font-semibold">
-                      {challenge.progress}/{challenge.total}
-                    </span>
-                  </div>
-                  <Progress value={(challenge.progress / challenge.total) * 100} className="h-3" />
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Award className="h-4 w-4 text-accent" />
-                  <span className="text-muted-foreground">Recompensa:</span>
-                  <span className="font-semibold text-accent">{challenge.reward}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
         </TabsContent>
       </Tabs>
     </div>
