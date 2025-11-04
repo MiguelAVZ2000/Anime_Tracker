@@ -46,8 +46,8 @@ export default function ForgotPasswordPage() {
             </CardTitle>
             <CardDescription className="text-center">
               {isSubmitted
-                ? "We've sent you a password reset link"
-                : "Enter your email and we'll send you a reset link"}
+                ? "We&apos;ve sent you a password reset link"
+                : "Enter your email and we&apos;ll send you a reset link"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -56,11 +56,11 @@ export default function ForgotPasswordPage() {
                 <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 text-center">
                   <Mail className="h-12 w-12 text-primary mx-auto mb-2" />
                   <p className="text-sm text-foreground">
-                    We've sent a password reset link to <strong>{email}</strong>
+                    We&apos;ve sent a password reset link to <strong>{email}</strong>
                   </p>
                 </div>
                 <p className="text-sm text-muted-foreground text-center">
-                  Didn't receive the email? Check your spam folder or{" "}
+                  Didn&apos;t receive the email? Check your spam folder or{" "}
                   <button onClick={() => setIsSubmitted(false)} className="text-primary hover:underline">
                     try again
                   </button>

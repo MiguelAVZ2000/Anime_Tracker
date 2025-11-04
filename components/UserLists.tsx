@@ -97,11 +97,11 @@ export default function UserLists({ initialAnimeList, initialMangaList }: UserLi
   const [activeAnimeTab, setAnimeTab] = useState("all");
   const [activeMangaTab, setMangaTab] = useState("all");
 
-  const handleUpdateEntry = (updatedEntry: MediaEntry) => {
-    if ('totalEpisodes' in updatedEntry) { // Es AnimeEntry
-      setAnimeList(prev => prev.map(item => item._id === updatedEntry._id ? updatedEntry : item));
+  const handleUpdateEntry = (_updatedItem: MediaEntry) => {
+    if ('totalEpisodes' in _updatedItem) { // Es AnimeEntry
+      setAnimeList(prev => prev.map(item => item._id === _updatedItem._id ? _updatedItem : item));
     } else { // Es MangaEntry
-      setMangaList(prev => prev.map(item => item._id === updatedEntry._id ? updatedEntry : item));
+      setMangaList(prev => prev.map(item => item._id === _updatedItem._id ? _updatedItem : item));
     }
   };
 

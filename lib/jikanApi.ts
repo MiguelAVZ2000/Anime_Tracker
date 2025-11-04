@@ -25,7 +25,11 @@ export async function searchAnime(query: string, page: number = 1, limit: number
 }
 
 export async function getAnimeById(id: number) {
-  return (await fetchJikan(`/anime/${id}/full`)).data;
+  const result = await fetchJikan(`/anime/${id}/full`);
+  if (!result || !result.data) {
+    throw new Error(`No se encontraron datos para el anime con ID: ${id}`);
+  }
+  return result.data;
 }
 
 export async function getTopAnime(page: number = 1, limit: number = 12) {
@@ -41,9 +45,17 @@ export async function searchManga(query: string, page: number = 1, limit: number
 }
 
 export async function getMangaById(id: number) {
-  return (await fetchJikan(`/manga/${id}/full`)).data;
+  const result = await fetchJikan(`/manga/${id}/full`);
+  if (!result || !result.data) {
+    throw new Error(`No se encontraron datos para el manga con ID: ${id}`);
+  }
+  return result.data;
 }
 
 export async function getTopManga(page: number = 1, limit: number = 12) {
   return fetchJikan(`/top/manga?page=${page}&limit=${limit}`);
+}
+
+export async function getSeasonUpcoming(page: number = 1, limit: number = 12) {
+  return fetchJikan(`/seasons/upcoming?page=${page}&limit=${limit}`);
 }

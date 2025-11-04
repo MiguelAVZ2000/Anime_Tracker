@@ -38,8 +38,8 @@ export default function AddToListButton({ media, mediaType }: AddToListButtonPro
       } else {
         toast({ variant: "destructive", title: "Error", description: data.message });
       }
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: `No se pudo agregar el ${mediaType} a la lista.` });
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message || `No se pudo agregar el ${mediaType} a la lista.` });
     } finally {
       setLoading(false);
     }

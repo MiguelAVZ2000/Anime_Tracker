@@ -1,42 +1,40 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
-import { hash } from 'bcrypt';
+import dbConnect from '@/lib/dbConnect';
+import User from '@/models/User';
+import bcrypt from 'bcrypt';
 
 export async function POST(request: Request) {
+  await dbConnect();
+
   try {
-    const { email, password, username } = await request.json();
+    const { username, email, password } = await request.json();
 
-    if (!email || !password || !username) {
-      return NextResponse.json({ message: 'Faltan campos obligatorios' }, { status: 400 });
-    }
-
-    const client = await clientPromise;
-    const db = client.db();
-
-    const existingUser = await db.collection('users').findOne({ email });
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return NextResponse.json({ message: 'El usuario ya existe' }, { status: 409 });
+      return NextResponse.json({ error: 'User with this email already exists.' }, { status: 400 });
     }
 
-    const hashedPassword = await hash(password, 10); // 10 es el número de rondas de sal
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = {
+    // Create new user
+    const newUser = new User({
+      name: username, // Map username from form to name in model
       email,
       password: hashedPassword,
-      username,
-      createdAt: new Date(),
-    };
+    });
 
-    const result = await db.collection('users').insertOne(newUser);
+    await newUser.save();
 
-    if (result.acknowledged) {
-      return NextResponse.json({ message: 'Usuario registrado exitosamente' }, { status: 201 });
-    } else {
-      throw new Error('Error al insertar el usuario');
+    return NextResponse.json({ message: 'User created successfully.' }, { status: 201 });
+
+  } catch (error) {
+    console.error('Signup Error:', error);
+    // Check for Mongoose validation error
+    if (error.name === 'ValidationError') {
+        return NextResponse.json({ error: error.message }, { status: 400 });
     }
-
-  } catch (error: any) {
-    console.error('Error en el registro:', error);
-    return NextResponse.json({ message: 'Error interno del servidor', error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
   }
 }

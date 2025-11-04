@@ -1,65 +1,38 @@
-import { NextRequest, NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
-import { getServerSession } from 'next-auth';
 
-async function getDb() {
-  const client = await clientPromise;
-  return client.db();
-}
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth.config';
+import dbConnect from '@/lib/dbConnect';
+import User from '@/models/User';
+import AnimeEntry from '@/models/AnimeEntry';
+import MangaEntry from '@/models/MangaEntry';
 
-async function getUserId() {
-  const session = await getServerSession();
+export async function GET() {
+  const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
-    return null;
-  }
-  return new ObjectId(session.user.id);
-}
-
-export async function GET(request: NextRequest) {
-  const userId = await getUserId();
-  if (!userId) {
-    return NextResponse.json({ message: 'No autenticado' }, { status: 401 });
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const db = await getDb();
-    const profile = await db.collection('users').findOne({ _id: userId });
+    await dbConnect();
 
-    if (profile) {
-      return NextResponse.json(profile);
-    } else {
-      return NextResponse.json({ message: 'Perfil no encontrado' }, { status: 404 });
+    const user = await User.findById(session.user.id).select('-password');
+
+    if (!user) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
+
+    const animeList = await AnimeEntry.find({ userId: session.user.id });
+    const mangaList = await MangaEntry.find({ userId: session.user.id });
+
+    return NextResponse.json({
+      user,
+      animeList,
+      mangaList,
+    });
   } catch (error) {
-    console.error('Error al obtener el perfil:', error);
-    return NextResponse.json({ message: 'Error interno del servidor', error }, { status: 500 });
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  const userId = await getUserId();
-  if (!userId) {
-    return NextResponse.json({ message: 'No autenticado' }, { status: 401 });
-  }
-
-  try {
-    const db = await getDb();
-    const body = await request.json();
-    const { _id, ...profileData } = body; // Asegurarse de que _id no se actualice
-
-    const result = await db.collection('users').updateOne(
-      { _id: userId },
-      { $set: profileData }
-    );
-
-    if (result.matchedCount === 1) {
-      return NextResponse.json({ message: 'Perfil actualizado exitosamente' });
-    } else {
-      return NextResponse.json({ message: 'Perfil no encontrado para actualizar' }, { status: 404 });
-    }
-  } catch (error) {
-    console.error('Error al actualizar el perfil:', error);
-    return NextResponse.json({ message: 'Error interno del servidor', error }, { status: 500 });
+    console.error('Error fetching profile data:', error);
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }

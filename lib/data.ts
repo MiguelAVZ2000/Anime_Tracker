@@ -1,11 +1,11 @@
 
-import clientPromise from './mongodb';
-import { ObjectId } from 'mongodb';
+import dbConnect from './dbConnect'; // Importar dbConnect
+import { ObjectId } from 'mongodb'; // ObjectId sigue siendo necesario para IDs de MongoDB
 import { getServerSession } from 'next-auth';
 
 async function getDb() {
-  const client = await clientPromise;
-  return client.db();
+  const conn = await dbConnect(); // Obtener la conexión de Mongoose
+  return conn.connection.db; // Acceder a la base de datos nativa de MongoDB a través de la conexión de Mongoose
 }
 
 async function getUserId() {
@@ -143,7 +143,7 @@ export async function updateProfile(profile: any) {
   if (!userId) return null;
 
   const db = await getDb();
-  const { _id, ...profileData } = profile;
+  const { _id: __id, ...profileData } = profile;
   const result = await db.collection('users').updateOne({ _id: userId }, { $set: profileData });
 
   return result;

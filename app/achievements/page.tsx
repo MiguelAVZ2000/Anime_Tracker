@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Trophy, Star, Target, Award, Lock } from "lucide-react"
+import { Trophy, Star, Lock } from "lucide-react"
 import { Achievement, achievementsList } from "@/lib/achievements";
 
 interface AchievementStatus extends Achievement {
@@ -22,15 +22,11 @@ async function getAchievementsStatus(): Promise<AchievementStatus[]> {
   // Simulación de la llamada a la API para este ejemplo
   const { default: dbConnect } = await import("@/lib/dbConnect");
   const { default: User } = await import("@/models/User");
-  const { default: AnimeEntry } = await import("@/models/AnimeEntry");
-  const { default: MangaEntry } = await import("@/models/MangaEntry");
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return [];
 
   await dbConnect();
   const user = await User.findById(session.user.id).lean();
-  const animeList = await AnimeEntry.find({ userId: session.user.id }).lean();
-  const mangaList = await MangaEntry.find({ userId: session.user.id }).lean();
   const userAchievements = user?.unlockedAchievements?.map(a => a.achievementId) || [];
 
   return achievementsList.map(ach => {

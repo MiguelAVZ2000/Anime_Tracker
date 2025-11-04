@@ -230,7 +230,7 @@ export default function RecommendationsPage() {
                   <div>
                     <h3 className="text-xl font-bold text-foreground mb-2">Personalized Just for You</h3>
                     <p className="text-muted-foreground">
-                      Based on your watch history, ratings, and preferences, we've curated these recommendations that
+                      Based on your watch history, ratings, and preferences, we&apos;ve curated these recommendations that
                       match your taste.
                     </p>
                   </div>
@@ -289,7 +289,7 @@ export default function RecommendationsPage() {
                 <div className="flex items-start gap-4">
                   <TrendingUp className="h-8 w-8 text-secondary flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="text-xl font-bold text-foreground mb-2">What's Hot Right Now</h3>
+                    <h3 className="text-xl font-bold text-foreground mb-2">What&apos;s Hot Right Now</h3>
                     <p className="text-muted-foreground">
                       The most popular anime and manga that everyone is talking about this week.
                     </p>
@@ -343,7 +343,7 @@ export default function RecommendationsPage() {
                   <div>
                     <h3 className="text-xl font-bold text-foreground mb-2">Because You Watched</h3>
                     <p className="text-muted-foreground">
-                      Titles similar to the anime and manga you've already enjoyed.
+                      Titles similar to the anime and manga you&apos;ve already enjoyed.
                     </p>
                   </div>
                 </div>

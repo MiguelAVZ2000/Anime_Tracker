@@ -1,34 +1,36 @@
-import { NextRequest, NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
-import { getServerSession } from 'next-auth';
 
-async function getDb() {
-  const client = await clientPromise;
-  return client.db();
-}
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth.config';
+import dbConnect from '@/lib/dbConnect';
+import AnimeEntry from '@/models/AnimeEntry';
+import MangaEntry from '@/models/MangaEntry';
 
-async function getUserId() {
-  const session = await getServerSession();
+export async function GET() {
+  const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
-    return null;
-  }
-  return new ObjectId(session.user.id);
-}
-
-export async function GET(request: NextRequest) {
-  const userId = await getUserId();
-  if (!userId) {
-    return NextResponse.json({ message: 'No autenticado' }, { status: 401 });
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const db = await getDb();
-    const recentActivity = await db.collection('activity').find({ userId }).sort({ createdAt: -1 }).limit(5).toArray();
+    await dbConnect();
 
-    return NextResponse.json(recentActivity);
+    const recentAnime = await AnimeEntry.find({ userId: session.user.id })
+      .sort({ updatedAt: -1 })
+      .limit(10);
+
+    const recentManga = await MangaEntry.find({ userId: session.user.id })
+      .sort({ updatedAt: -1 })
+      .limit(10);
+
+    const recentActivity = [...recentAnime, ...recentManga].sort(
+      (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+    );
+
+    return NextResponse.json(recentActivity.slice(0, 10));
   } catch (error) {
-    console.error('Error al obtener actividad reciente:', error);
-    return NextResponse.json({ message: 'Error interno del servidor', error }, { status: 500 });
+    console.error('Error fetching recent activity:', error);
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }

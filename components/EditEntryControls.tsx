@@ -72,8 +72,8 @@ export default function EditEntryControls({ item, mediaType, onUpdate }: EditEnt
       } else {
         toast({ variant: "destructive", title: "Error", description: data.message });
       }
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "No se pudo actualizar la entrada." });
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message || "No se pudo actualizar la entrada." });
     } finally {
       setLoading(false);
     }

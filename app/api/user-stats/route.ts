@@ -1,57 +1,48 @@
-import { NextRequest, NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
-import { getServerSession } from 'next-auth';
 
-async function getDb() {
-  const client = await clientPromise;
-  return client.db();
-}
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth.config';
+import dbConnect from '@/lib/dbConnect';
+import AnimeEntry from '@/models/AnimeEntry';
+import MangaEntry from '@/models/MangaEntry';
 
-async function getUserId() {
-  const session = await getServerSession();
+export async function GET() {
+  const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
-    return null;
-  }
-  return new ObjectId(session.user.id);
-}
-
-export async function GET(request: NextRequest) {
-  const userId = await getUserId();
-  if (!userId) {
-    return NextResponse.json({ message: 'No autenticado' }, { status: 401 });
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const db = await getDb();
-    const userAnime = await db.collection('user_anime').find({ userId }).toArray();
-    const userManga = await db.collection('user_manga').find({ userId }).toArray();
+    await dbConnect();
 
-    const animeWatching = userAnime.filter((d) => d.status === 'watching').length;
-    const animeCompleted = userAnime.filter((d) => d.status === 'completed').length;
-    const animePlanToWatch = userAnime.filter((d) => d.status === 'plan_to_watch').length;
+    const animeList = await AnimeEntry.find({ userId: session.user.id });
+    const mangaList = await MangaEntry.find({ userId: session.user.id });
 
-    const mangaReading = userManga.filter((d) => d.status === 'reading').length;
-    const mangaCompleted = userManga.filter((d) => d.status === 'completed').length;
-    const mangaPlanToRead = userManga.filter((d) => d.status === 'plan_to_read').length;
+    const totalAnime = animeList.length;
+    const totalManga = mangaList.length;
 
-    // Mocking other stats for now
-    const userStats = {
-      animeWatching,
-      animeCompleted,
-      animePlanToWatch,
-      mangaReading,
-      mangaCompleted,
-      mangaPlanToRead,
-      totalEpisodesWatched: 2847,
-      totalChaptersRead: 1523,
-      daysWatched: 42.3,
-      averageScore: 8.2,
-    };
+    const animeScores = animeList.map(entry => entry.rating).filter(rating => rating !== null && rating !== undefined) as number[];
+    const mangaScores = mangaList.map(entry => entry.rating).filter(rating => rating !== null && rating !== undefined) as number[];
 
-    return NextResponse.json(userStats);
+    const meanAnimeScore = animeScores.length > 0 ? animeScores.reduce((a, b) => a + b, 0) / animeScores.length : 0;
+    const meanMangaScore = mangaScores.length > 0 ? mangaScores.reduce((a, b) => a + b, 0) / mangaScores.length : 0;
+
+    const episodesWatched = animeList.reduce((acc, entry) => acc + entry.progress, 0);
+    const timeSpentWatching = episodesWatched * 24; // Assuming 24 minutes per episode
+
+    const chaptersRead = mangaList.reduce((acc, entry) => acc + entry.progress, 0);
+
+    return NextResponse.json({
+      totalAnime,
+      totalManga,
+      meanAnimeScore,
+      meanMangaScore,
+      timeSpentWatching,
+      chaptersRead,
+    });
   } catch (error) {
-    console.error('Error al obtener estadísticas del usuario:', error);
-    return NextResponse.json({ message: 'Error interno del servidor', error }, { status: 500 });
+    console.error('Error fetching user stats:', error);
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }

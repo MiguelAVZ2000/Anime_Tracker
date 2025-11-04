@@ -1,36 +1,34 @@
-import { NextRequest, NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
-import { getServerSession } from 'next-auth';
 
-async function getDb() {
-  const client = await clientPromise;
-  return client.db();
-}
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth.config';
+import dbConnect from '@/lib/dbConnect';
+import AnimeEntry from '@/models/AnimeEntry';
+import { getSeasonUpcoming } from '@/lib/jikanApi';
 
-async function getUserId() {
-  const session = await getServerSession();
+export async function GET() {
+  const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
-    return null;
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
-  return new ObjectId(session.user.id);
-}
-
-export async function GET(request: NextRequest) {
-  // No se requiere autenticación para próximos estrenos si son públicos
-  // Si se requiere, descomentar las siguientes líneas:
-  // const userId = await getUserId();
-  // if (!userId) {
-  //   return NextResponse.json({ message: 'No autenticado' }, { status: 401 });
-  // }
 
   try {
-    const db = await getDb();
-    const upcomingReleases = await db.collection('releases').find().sort({ release_date: 1 }).limit(3).toArray();
+    await dbConnect();
+
+    const planToWatch = await AnimeEntry.find({
+      userId: session.user.id,
+      status: 'Plan to Watch',
+    });
+
+    const upcomingSeason = await getSeasonUpcoming();
+    const upcomingAnimeIds = upcomingSeason.data.map((anime: any) => anime.mal_id);
+
+    const upcomingReleases = planToWatch.filter(entry => upcomingAnimeIds.includes(entry.mediaId));
 
     return NextResponse.json(upcomingReleases);
   } catch (error) {
-    console.error('Error al obtener próximos estrenos:', error);
-    return NextResponse.json({ message: 'Error interno del servidor', error }, { status: 500 });
+    console.error('Error fetching upcoming releases:', error);
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }

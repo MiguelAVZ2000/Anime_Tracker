@@ -1,10 +1,10 @@
 import { getAnimeById } from "@/lib/jikanApi";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { Star, Tv, Film, Calendar, Clapperboard, Book, Users, BarChart } from "lucide-react";
+import { Star, Tv, Calendar, Clapperboard, Book, Users, BarChart } from "lucide-react";
 import AddToListButton from "@/components/AddToListButton";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth.config";
+import { authOptions } from "@/lib/auth";
 import ReviewsSection from "@/components/ReviewsSection";
 
 interface AnimeDetailsPageProps {

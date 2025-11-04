@@ -40,7 +40,7 @@ import { cn } from "@/lib/utils"
 
 export function MainNav() {
   const pathname = usePathname()
-  const { theme, setTheme } = useTheme()
+  const { setTheme } = useTheme()
   const [isScrolled, setIsScrolled] = useState(false)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [showNav, setShowNav] = useState(true)

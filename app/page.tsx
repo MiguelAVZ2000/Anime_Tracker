@@ -3,105 +3,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Star, TrendingUp, Clock, Play, Sparkles, Users, Trophy } from "lucide-react"
+import { getTopAnime, getTopManga } from "@/lib/jikanApi"
 
-// Mock data for popular titles
-const popularAnime = [
-  {
-    id: 1,
-    title: "Attack on Titan",
-    image: "/anime-poster.png",
-    rating: 9.0,
-    status: "Completed",
-    episodes: 87,
-    type: "anime",
-  },
-  {
-    id: 2,
-    title: "Demon Slayer",
-    image: "/demon-slayer-anime-poster.png",
-    rating: 8.7,
-    status: "Ongoing",
-    episodes: 55,
-    type: "anime",
-  },
-  {
-    id: 3,
-    title: "Jujutsu Kaisen",
-    image: "/jujutsu-kaisen-poster.png",
-    rating: 8.6,
-    status: "Ongoing",
-    episodes: 47,
-    type: "anime",
-  },
-  {
-    id: 4,
-    title: "One Piece",
-    image: "/anime-poster.png",
-    rating: 8.9,
-    status: "Ongoing",
-    episodes: 1100,
-    type: "anime",
-  },
-  {
-    id: 5,
-    title: "My Hero Academia",
-    image: "/my-hero-academia-poster.png",
-    rating: 8.4,
-    status: "Ongoing",
-    episodes: 138,
-    type: "anime",
-  },
-  {
-    id: 6,
-    title: "Chainsaw Man",
-    image: "/chainsaw-man-anime-poster.png",
-    rating: 8.5,
-    status: "Completed",
-    episodes: 12,
-    type: "anime",
-  },
-]
+export default async function HomePage() {
+  const { data: popularAnime } = await getTopAnime();
+  const { data: popularManga } = await getTopManga();
 
-const popularManga = [
-  {
-    id: 7,
-    title: "Berserk",
-    image: "/berserk-manga-cover.jpg",
-    rating: 9.1,
-    status: "Ongoing",
-    chapters: 374,
-    type: "manga",
-  },
-  {
-    id: 8,
-    title: "One Punch Man",
-    image: "/one-punch-man-manga-cover.png",
-    rating: 8.7,
-    status: "Ongoing",
-    chapters: 195,
-    type: "manga",
-  },
-  {
-    id: 9,
-    title: "Tokyo Ghoul",
-    image: "/tokyo-ghoul-manga-cover.jpg",
-    rating: 8.3,
-    status: "Completed",
-    chapters: 143,
-    type: "manga",
-  },
-  {
-    id: 10,
-    title: "Vinland Saga",
-    image: "/vinland-saga-manga-cover.jpg",
-    rating: 8.8,
-    status: "Ongoing",
-    chapters: 207,
-    type: "manga",
-  },
-]
-
-export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -110,7 +17,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Play className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-bold text-foreground">AnimeTracker</h1>
+              <h1 className="text-2xl font-bold text-foreground">Otakutrack</h1>
             </div>
             <nav className="flex items-center gap-4">
               <Link href="/dashboard">
@@ -262,19 +169,19 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {popularAnime.map((anime) => (
-            <Link key={anime.id} href={`/anime/${anime.id}`}>
+          {popularAnime?.map((anime: any) => (
+            <Link key={anime.mal_id} href={`/anime/${anime.mal_id}`}>
               <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden">
                 <div className="relative aspect-[3/4]">
                   <img
-                    src={anime.image || "/placeholder.svg"}
+                    src={anime.images?.jpg?.image_url || "/placeholder.svg"}
                     alt={anime.title}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-2 right-2">
                     <Badge className="bg-primary text-primary-foreground">
                       <Star className="h-3 w-3 mr-1" />
-                      {anime.rating}
+                      {anime.score}
                     </Badge>
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -304,19 +211,19 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {popularManga.map((manga) => (
-            <Link key={manga.id} href={`/manga/${manga.id}`}>
+          {popularManga?.map((manga: any) => (
+            <Link key={manga.mal_id} href={`/manga/${manga.mal_id}`}>
               <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden">
                 <div className="relative aspect-[3/4]">
                   <img
-                    src={manga.image || "/placeholder.svg"}
+                    src={manga.images?.jpg?.image_url || "/placeholder.svg"}
                     alt={manga.title}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-2 right-2">
                     <Badge className="bg-primary text-primary-foreground">
                       <Star className="h-3 w-3 mr-1" />
-                      {manga.rating}
+                      {manga.score}
                     </Badge>
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -337,14 +244,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-card/50 mt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-muted-foreground">
-            <p>&copy; 2025 AnimeTracker. Track your anime and manga journey.</p>
-          </div>
-        </div>
-      </footer>
+
     </div>
   )
 }
