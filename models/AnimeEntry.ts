@@ -1,33 +1,33 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Model } from "mongoose";
 
 export interface IAnimeEntry extends Document {
   userId: mongoose.Schema.Types.ObjectId;
-  mediaId: number;
+  mal_id: number;
   title: string;
-  image?: string;
-  status: 'Watching' | 'Completed' | 'Plan to Watch' | 'Dropped' | 'On Hold';
-  progress: number;
-  total: number;
-  rating?: number;
-  createdAt: Date;
-  updatedAt: Date;
+  image: string;
+  status: "watching" | "completed" | "on_hold" | "dropped" | "plan_to_watch";
+  score: number;
+  progress: number; // episodes watched
+  totalEpisodes?: number;
+  type: string;
 }
 
-const AnimeEntrySchema: Schema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  mediaId: { type: Number, required: true },
+const AnimeEntrySchema: Schema<IAnimeEntry> = new Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  mal_id: { type: Number, required: true },
   title: { type: String, required: true },
   image: { type: String },
   status: {
     type: String,
-    enum: ['Watching', 'Completed', 'Plan to Watch', 'Dropped', 'On Hold'],
-    required: true,
+    enum: ["watching", "completed", "on_hold", "dropped", "plan_to_watch"],
+    default: "plan_to_watch",
   },
+  score: { type: Number, default: 0 },
   progress: { type: Number, default: 0 },
-  total: { type: Number },
-  rating: { type: Number, min: 1, max: 10 },
-}, {
-  timestamps: true,
+  totalEpisodes: { type: Number },
+  type: { type: String },
 });
 
-export default mongoose.models.AnimeEntry || mongoose.model<IAnimeEntry>('AnimeEntry', AnimeEntrySchema);
+const AnimeEntry: Model<IAnimeEntry> = mongoose.models.AnimeEntry || mongoose.model<IAnimeEntry>("AnimeEntry", AnimeEntrySchema);
+
+export default AnimeEntry;

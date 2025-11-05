@@ -4,7 +4,9 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
-import { MainNav } from "@/components/main-nav"
+import dynamic from 'next/dynamic';
+
+const DynamicMainNav = dynamic(() => import("@/components/main-nav").then(mod => mod.MainNav), { ssr: false });
 import { Footer } from "@/components/footer"
 import "./globals.css"
 
@@ -25,9 +27,9 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body className={`font-sans antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <Providers>
-            <MainNav />
+            <DynamicMainNav />
             <main className="min-h-screen">{children}</main>
             <Footer />
           </Providers>

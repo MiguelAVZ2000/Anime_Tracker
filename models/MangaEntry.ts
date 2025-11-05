@@ -1,33 +1,33 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Model } from "mongoose";
 
 export interface IMangaEntry extends Document {
   userId: mongoose.Schema.Types.ObjectId;
-  mediaId: number;
+  mal_id: number;
   title: string;
-  image?: string;
-  status: 'Reading' | 'Completed' | 'Plan to Read' | 'Dropped' | 'On Hold';
-  progress: number;
-  total: number;
-  rating?: number;
-  createdAt: Date;
-  updatedAt: Date;
+  image: string;
+  status: "reading" | "completed" | "on_hold" | "dropped" | "plan_to_read";
+  score: number;
+  progress: number; // chapters read
+  totalChapters?: number;
+  type: string;
 }
 
-const MangaEntrySchema: Schema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  mediaId: { type: Number, required: true },
+const MangaEntrySchema: Schema<IMangaEntry> = new Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  mal_id: { type: Number, required: true },
   title: { type: String, required: true },
   image: { type: String },
   status: {
     type: String,
-    enum: ['Reading', 'Completed', 'Plan to Read', 'Dropped', 'On Hold'],
-    required: true,
+    enum: ["reading", "completed", "on_hold", "dropped", "plan_to_read"],
+    default: "plan_to_read",
   },
+  score: { type: Number, default: 0 },
   progress: { type: Number, default: 0 },
-  total: { type: Number },
-  rating: { type: Number, min: 1, max: 10 },
-}, {
-  timestamps: true,
+  totalChapters: { type: Number },
+  type: { type: String },
 });
 
-export default mongoose.models.MangaEntry || mongoose.model<IMangaEntry>('MangaEntry', MangaEntrySchema);
+const MangaEntry: Model<IMangaEntry> = mongoose.models.MangaEntry || mongoose.model<IMangaEntry>("MangaEntry", MangaEntrySchema);
+
+export default MangaEntry;

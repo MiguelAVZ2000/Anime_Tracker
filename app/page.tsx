@@ -4,11 +4,26 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Star, TrendingUp, Clock, Play, Sparkles, Users, Trophy } from "lucide-react"
-import { getTopAnime, getTopManga } from "@/lib/jikanApi"
+import { getTopAnime } from "@/lib/jikanApi"
+import { getPopularMangaAnilist } from "@/lib/anilistApi"
 
 export default async function HomePage() {
   const { data: popularAnime } = await getTopAnime();
-  const { data: popularManga } = await getTopManga();
+  const anilistResponse = await getPopularMangaAnilist();
+  const popularManga = anilistResponse.Page.media.map((manga: any) => {
+    return {
+      mal_id: manga.id,
+      title: manga.title.userPreferred || manga.title.english || manga.title.romaji,
+      images: {
+        jpg: {
+          image_url: manga.coverImage.large,
+        },
+      },
+      chapters: manga.chapters || "N/A",
+      status: manga.status,
+      score: manga.averageScore || "N/A",
+    };
+  });
 
   return (
     <div className="min-h-screen bg-background">

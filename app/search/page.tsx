@@ -57,6 +57,7 @@ export default function SearchPage() {
         throw new Error("La solicitud falló");
       }
       const data = await response.json();
+      console.log("Datos recibidos del API interno:", data);
       setResults(data.data || []);
       setPagination(data.pagination || null);
     } catch (err: any) {
