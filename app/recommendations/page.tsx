@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Image from "next/image"
 import Link from "next/link"
 import { Play, Star, Sparkles, TrendingUp, Users, Heart } from "lucide-react"
 
@@ -244,9 +245,11 @@ export default function RecommendationsPage() {
                   <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden h-full">
                     <div className="flex gap-4 p-4">
                       <div className="relative w-32 flex-shrink-0">
-                        <img
+                        <Image
                           src={item.image || "/placeholder.svg"}
                           alt={item.title}
+                          width={128}
+                          height={171}
                           className="w-full aspect-[3/4] object-cover rounded-lg"
                         />
                         <div className="absolute top-2 right-2">
@@ -303,9 +306,11 @@ export default function RecommendationsPage() {
                 <Link key={item.id} href={`/${item.type}/${item.id}`}>
                   <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden">
                     <div className="relative aspect-[3/4]">
-                      <img
+                      <Image
                         src={item.image || "/placeholder.svg"}
                         alt={item.title}
+                        fill
+                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute top-2 right-2">
@@ -368,9 +373,11 @@ export default function RecommendationsPage() {
                       <Link key={item.id} href={`/${item.type}/${item.id}`}>
                         <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden">
                           <div className="relative aspect-[3/4]">
-                            <img
+                            <Image
                               src={item.image || "/placeholder.svg"}
                               alt={item.title}
+                              fill
+                              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                               className="w-full h-full object-cover"
                             />
                             <div className="absolute top-2 right-2">
@@ -424,9 +431,11 @@ export default function RecommendationsPage() {
                   <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden h-full">
                     <div className="flex gap-4 p-4">
                       <div className="relative w-24 flex-shrink-0">
-                        <img
+                        <Image
                           src={item.image || "/placeholder.svg"}
                           alt={item.title}
+                          width={96}
+                          height={128}
                           className="w-full aspect-[3/4] object-cover rounded-lg"
                         />
                         <div className="absolute top-2 right-2">

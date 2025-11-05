@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -173,9 +174,11 @@ export default async function HomePage() {
             <Link key={anime.mal_id} href={`/anime/${anime.mal_id}`}>
               <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden">
                 <div className="relative aspect-[3/4]">
-                  <img
+                  <Image
                     src={anime.images?.jpg?.image_url || "/placeholder.svg"}
                     alt={anime.title}
+                    fill
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 16vw"
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-2 right-2">
@@ -215,9 +218,11 @@ export default async function HomePage() {
             <Link key={manga.mal_id} href={`/manga/${manga.mal_id}`}>
               <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden">
                 <div className="relative aspect-[3/4]">
-                  <img
+                  <Image
                     src={manga.images?.jpg?.image_url || "/placeholder.svg"}
                     alt={manga.title}
+                    fill
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-2 right-2">

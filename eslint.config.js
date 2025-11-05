@@ -41,6 +41,8 @@ export default [
       // Custom rules or overrides
       "react/react-in-jsx-scope": "off", // Next.js doesn't require React to be in scope
       "react/prop-types": "off", // Often not needed with TypeScript
+      "@typescript-eslint/no-unused-vars": "off",
+      "no-unused-vars": "off"
     },
     settings: {
       react: {

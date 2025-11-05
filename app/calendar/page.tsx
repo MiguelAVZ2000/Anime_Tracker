@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Image from "next/image"
 import Link from "next/link"
 
 const weekDays = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
@@ -123,9 +124,11 @@ export default function CalendarPage() {
                           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                             <CardContent className="p-4">
                               <div className="flex gap-4">
-                                <img
+                                <Image
                                   src={anime.image || "/placeholder.svg"}
                                   alt={anime.title}
+                                  width={80}
+                                  height={112}
                                   className="w-20 h-28 object-cover rounded-md"
                                 />
                                 <div className="flex-1 space-y-2">
@@ -175,9 +178,11 @@ export default function CalendarPage() {
                     <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                       <CardContent className="p-4">
                         <div className="flex gap-4">
-                          <img
+                          <Image
                             src={manga.image || "/placeholder.svg"}
                             alt={manga.title}
+                            width={80}
+                            height={112}
                             className="w-20 h-28 object-cover rounded-md"
                           />
                           <div className="flex-1 space-y-2">

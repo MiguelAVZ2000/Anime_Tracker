@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import Image from "next/image"
 import Link from "next/link"
 
 const customLists = [
@@ -104,7 +105,7 @@ export default function ListsPage() {
         {customLists.map((list) => (
           <Card key={list.id} className="overflow-hidden hover:shadow-lg transition-shadow">
             <div className="relative h-48">
-              <img src={list.image || "/placeholder.svg"} alt={list.name} className="w-full h-full object-cover" />
+              <Image src={list.image || "/placeholder.svg"} alt={list.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
                 <div className="flex items-start justify-between mb-2">

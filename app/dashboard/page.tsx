@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import Image from "next/image"
 import Link from "next/link"
 import {
   Play,
@@ -229,9 +230,11 @@ export default async function DashboardPage() {
               ].map((rec, index) => (
                 <div key={index} className="group cursor-pointer">
                   <div className="relative aspect-[3/4] rounded-lg overflow-hidden mb-2">
-                    <img
+                    <Image
                       src={rec.image || "/placeholder.svg"}
                       alt={rec.title}
+                      fill
+                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                     />
                     <div className="absolute top-2 right-2">
@@ -275,9 +278,11 @@ export default async function DashboardPage() {
                   {currentlyWatching.map((anime) => (
                     <Link key={anime.id} href={`/anime/${anime.id}`}>
                       <div className="flex gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                        <img
+                        <Image
                           src={anime.image || "/placeholder.svg"}
                           alt={anime.title}
+                          width={64}
+                          height={96}
                           className="w-16 h-24 object-cover rounded"
                         />
                         <div className="flex-1">
@@ -320,9 +325,11 @@ export default async function DashboardPage() {
                   {currentlyReading.map((manga) => (
                     <Link key={manga.id} href={`/manga/${manga.id}`}>
                       <div className="flex gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                        <img
+                        <Image
                           src={manga.image || "/placeholder.svg"}
                           alt={manga.title}
+                          width={64}
+                          height={96}
                           className="w-16 h-24 object-cover rounded"
                         />
                         <div className="flex-1">
