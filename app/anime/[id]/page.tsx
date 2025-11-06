@@ -1,4 +1,4 @@
-import { getAnimeById } from "@/lib/anilistApi";
+import { getAnimeById } from "@/lib/jikanApi";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Star, Tv, Calendar, Clapperboard, Book, Users, BarChart } from "lucide-react";
@@ -15,18 +15,17 @@ interface AnimeDetailsPageProps {
 
 export default async function AnimeDetailsPage({ params }: AnimeDetailsPageProps) {
   const session = await getServerSession(authOptions);
-  const anilistResponse = await getAnimeById(Number(params.id));
-  const anime = anilistResponse.Media;
+  const anime = await getAnimeById(Number(params.id));
 
   if (!anime) {
     return <div className="container mx-auto px-4 py-8 text-center">Anime no encontrado.</div>;
   }
 
   const mediaDataForList = {
-    mal_id: anime.id, // Usar el ID de Anilist
-    title: anime.title.userPreferred || anime.title.english || anime.title.romaji,
-    image: anime.coverImage.large,
-    type: "ANIME", // Anilist devuelve "ANIME" o "MANGA"
+    mal_id: anime.mal_id,
+    title: anime.title,
+    image: anime.images.jpg.large_image_url,
+    type: "ANIME",
     totalEpisodes: anime.episodes,
   };
 
@@ -45,22 +44,18 @@ export default async function AnimeDetailsPage({ params }: AnimeDetailsPageProps
         </div>
         <div className="md:col-span-2">
           <h1 className="text-4xl font-bold mb-2">{anime.title}</h1>
-          <h2 className="text-xl text-muted-foreground mb-4">{anime.title.native}</h2>
+          <h2 className="text-xl text-muted-foreground mb-4">{anime.title_japanese}</h2>
 
           <div className="flex flex-wrap gap-2 mb-6">
-            {anime.genres.map((genre: string) => (
-              <Badge key={genre} variant="secondary">{genre}</Badge>
+            {anime.genres.map((genre: any) => (
+              <Badge key={genre.mal_id} variant="secondary">{genre.name}</Badge>
             ))}
           </div>
 
           <div className="flex items-center gap-6 mb-6 text-lg">
             <div className="flex items-center gap-2 font-bold">
               <Star className="text-yellow-400" />
-              <span>{anime.averageScore || "N/A"}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <BarChart />
-              <span>Mean Score: {anime.meanScore || "N/A"}</span>
+              <span>{anime.score || "N/A"}</span>
             </div>
             <div className="flex items-center gap-2">
               <Users />
@@ -69,21 +64,21 @@ export default async function AnimeDetailsPage({ params }: AnimeDetailsPageProps
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
-            <div className="flex items-center gap-2"><Tv /> <strong>Tipo:</strong> ANIME</div>
+            <div className="flex items-center gap-2"><Tv /> <strong>Tipo:</strong> {anime.type}</div>
             <div className="flex items-center gap-2"><Clapperboard /> <strong>Episodios:</strong> {anime.episodes || "N/A"}</div>
-            <div className="flex items-center gap-2"><Calendar /> <strong>Emisión:</strong> {anime.startDate.year ? `${anime.startDate.day || ''}/${anime.startDate.month || ''}/${anime.startDate.year}` : "N/A"}</div>
-            <div className="flex items-center gap-2"><Book /> <strong>Estudios:</strong> {anime.studios?.edges[0]?.node?.name || "N/A"}</div>
+            <div className="flex items-center gap-2"><Calendar /> <strong>Emisión:</strong> {anime.aired.string}</div>
+            <div className="flex items-center gap-2"><Book /> <strong>Estudios:</strong> {anime.studios[0]?.name || "N/A"}</div>
           </div>
 
           <h3 className="text-2xl font-semibold border-b pb-2 mb-4">Sinopsis</h3>
-          <p className="text-muted-foreground whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: anime.description || "No hay sinopsis disponible." }}></p>
+          <p className="text-muted-foreground whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: anime.synopsis || "No hay sinopsis disponible." }}></p>
 
-          {anime.trailer?.id && anime.trailer?.site === "youtube" && (
+          {anime.trailer?.youtube_id && (
             <div className="mt-8">
               <h3 className="text-2xl font-semibold border-b pb-2 mb-4">Trailer</h3>
               <iframe
                 className="w-full aspect-video rounded-lg"
-                src={`https://www.youtube.com/embed/${anime.trailer.id}`}
+                src={`https://www.youtube.com/embed/${anime.trailer.youtube_id}`}
                 title="YouTube video player"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

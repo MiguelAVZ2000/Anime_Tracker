@@ -3,7 +3,6 @@ import type React from "react"
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next"
-import { ThemeProvider } from "@/components/theme-provider"
 import dynamic from 'next/dynamic';
 
 const DynamicMainNav = dynamic(() => import("@/components/main-nav").then(mod => mod.MainNav), { ssr: false });
@@ -27,13 +26,11 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body className={`font-sans antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <Providers>
-            <DynamicMainNav />
-            <main className="min-h-screen">{children}</main>
-            <Footer />
-          </Providers>
-        </ThemeProvider>
+        <Providers>
+          <DynamicMainNav />
+          <main className="min-h-screen">{children}</main>
+          <Footer />
+        </Providers>
         <Analytics />
       </body>
     </html>

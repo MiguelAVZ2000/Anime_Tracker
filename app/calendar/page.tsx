@@ -8,8 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Image from "next/image"
 import Link from "next/link"
-import { getSeasonNow, getSeasonUpcoming } from "@/lib/jikanApi";
-import { getUpcomingMangaAnilist } from "@/lib/anilistApi";
+import { getSeasonNow } from "@/lib/jikanApi";
 
 interface AnimeScheduleItem {
   id: number;
@@ -20,28 +19,13 @@ interface AnimeScheduleItem {
   rating?: number;
 }
 
-interface MangaReleaseItem {
-  id: number;
-  title: string;
-  chapter?: number;
-  date: string;
-  image: string;
-  rating?: number;
-}
-
 const weekDays = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-
-const animeSchedule: { [key: string]: any[] } = {};
-const mangaReleases: any[] = [];
 
 export default function CalendarPage() {
   const [currentWeek, setCurrentWeek] = useState(0);
   const [animeSchedule, setAnimeSchedule] = useState<{ [key: string]: AnimeScheduleItem[] }>({});
-  const [mangaReleases, setMangaReleases] = useState<MangaReleaseItem[]>([]);
   const [loadingAnime, setLoadingAnime] = useState(true);
-  const [loadingManga, setLoadingManga] = useState(true);
   const [errorAnime, setErrorAnime] = useState<string | null>(null);
-  const [errorManga, setErrorManga] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAnimeSchedule = async () => {
@@ -78,36 +62,7 @@ export default function CalendarPage() {
       }
     };
 
-    const fetchMangaReleases = async () => {
-      setLoadingManga(true);
-      setErrorManga(null);
-      try {
-        const anilistResponse = await getUpcomingMangaAnilist();
-        const releases: MangaReleaseItem[] = anilistResponse.Page.media.map((manga: any) => {
-          const date = manga.startDate.year && manga.startDate.month && manga.startDate.day
-            ? new Date(manga.startDate.year, manga.startDate.month - 1, manga.startDate.day).toISOString()
-            : new Date().toISOString(); // Placeholder si no hay fecha
-
-          return {
-            id: manga.id,
-            title: manga.title.userPreferred || manga.title.english || manga.title.romaji,
-            chapter: manga.chapters || "N/A",
-            date: date,
-            image: manga.coverImage.large,
-            rating: manga.averageScore || "N/A",
-          };
-        });
-        setMangaReleases(releases);
-      } catch (err: any) {
-        setErrorManga("Error al cargar los próximos lanzamientos de manga.");
-        console.error("Error fetching manga releases:", err);
-      } finally {
-        setLoadingManga(false);
-      }
-    };
-
     fetchAnimeSchedule();
-    fetchMangaReleases();
   }, [currentWeek]);
 
   return (
@@ -121,9 +76,8 @@ export default function CalendarPage() {
       </div>
 
       <Tabs defaultValue="anime" className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-md grid-cols-1">
           <TabsTrigger value="anime">Anime Semanal</TabsTrigger>
-          <TabsTrigger value="manga">Manga Próximos</TabsTrigger>
         </TabsList>
 
         <TabsContent value="anime" className="space-y-6">
@@ -197,68 +151,6 @@ export default function CalendarPage() {
                       </div>
                     </div>
                   ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="manga" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Próximos Capítulos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loadingManga && <p className="text-center text-muted-foreground py-4">Cargando próximos lanzamientos de manga...</p>}
-              {errorManga && <p className="text-center text-destructive py-4">{errorManga}</p>}
-              {!loadingManga && !errorManga && (
-                <div className="grid gap-4">
-                  {mangaReleases.length > 0 ? (
-                    mangaReleases.map((manga) => (
-                      <Link key={manga.id} href={`/manga/${manga.id}`}>
-                        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                          <CardContent className="p-4">
-                            <div className="flex gap-4">
-                              <Image
-                                src={manga.image}
-                                alt={manga.title}
-                                width={80}
-                                height={112}
-                                className="w-20 h-28 object-cover rounded-md"
-                              />
-                              <div className="flex-1 space-y-2">
-                                <div className="flex items-start justify-between">
-                                  <div>
-                                    <h4 className="font-semibold">{manga.title}</h4>
-                                    <p className="text-sm text-muted-foreground">Capítulo {manga.chapter}</p>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                    <span className="text-sm font-medium">{manga.rating}</span>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <CalendarIcon className="h-4 w-4" />
-                                  <span>
-                                    {new Date(manga.date).toLocaleDateString("es-ES", {
-                                      day: "numeric",
-                                      month: "long",
-                                      year: "numeric",
-                                    })}
-                                  </span>
-                                </div>
-                                <Button size="sm" className="w-full">
-                                  Añadir Recordatorio
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No hay próximos lanzamientos de manga.</p>
-                  )}
                 </div>
               )}
             </CardContent>
