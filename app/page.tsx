@@ -13,27 +13,7 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Play className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-bold text-foreground">Otakutrack</h1>
-            </div>
-            <nav className="flex items-center gap-4">
-              <Link href="/dashboard">
-                <Button variant="ghost">Dashboard</Button>
-              </Link>
-              <Link href="/search">
-                <Button variant="ghost">Search</Button>
-              </Link>
-              <Link href="/login">
-                <Button variant="default">Sign In</Button>
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">

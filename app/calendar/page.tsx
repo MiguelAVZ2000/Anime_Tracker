@@ -37,9 +37,19 @@ export default function CalendarPage() {
           Lunes: [], Martes: [], Miércoles: [], Jueves: [], Viernes: [], Sábado: [], Domingo: []
         };
 
+        const dayMap: { [key: string]: string } = {
+          "Mondays": "Lunes",
+          "Tuesdays": "Martes",
+          "Wednesdays": "Miércoles",
+          "Thursdays": "Jueves",
+          "Fridays": "Viernes",
+          "Saturdays": "Sábado",
+          "Sundays": "Domingo"
+        };
+
         response.data.forEach((anime: any) => {
           if (anime.broadcast && anime.broadcast.day) {
-            const day = anime.broadcast.day.replace('s', 's').replace('u', 'u').replace('a', 'a').replace('d', 'd').replace('o', 'o'); // Simple mapping, might need more robust logic
+            const day = dayMap[anime.broadcast.day];
             const item: AnimeScheduleItem = {
               id: anime.mal_id,
               title: anime.title_english || anime.title || anime.title_japanese,
@@ -48,7 +58,7 @@ export default function CalendarPage() {
               image: anime.images?.jpg?.large_image_url || anime.images?.webp?.large_image_url || "/placeholder.svg",
               rating: anime.score,
             };
-            if (schedule[day]) {
+            if (day && schedule[day]) {
               schedule[day].push(item);
             }
           }

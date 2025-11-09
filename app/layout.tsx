@@ -3,9 +3,7 @@ import type React from "react"
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next"
-import dynamic from 'next/dynamic';
-
-const DynamicMainNav = dynamic(() => import("@/components/main-nav").then(mod => mod.MainNav), { ssr: false });
+import { MainNav } from "@/components/main-nav";
 import { Footer } from "@/components/footer"
 import "./globals.css"
 
@@ -27,7 +25,7 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body className={`font-sans antialiased`}>
         <Providers>
-          <DynamicMainNav />
+          <MainNav />
           <main className="min-h-screen">{children}</main>
           <Footer />
         </Providers>
