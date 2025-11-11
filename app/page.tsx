@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Star, TrendingUp, Clock, Play, Sparkles, Users, Trophy } from "lucide-react"
 import { getTopAnime, getTopManga } from "@/lib/jikanApi"
+import { translate } from "@/lib/translator"
 
 export default async function HomePage() {
   const { data: popularAnime } = await getTopAnime();
@@ -34,7 +35,7 @@ export default async function HomePage() {
               conectando con la comunidad.
             </p>
             <div className="flex items-center justify-center gap-4 flex-wrap">
-              <Link href="/signup">
+              <Link href="/register">
                 <Button
                   size="lg"
                   className="text-lg px-8 py-6 bg-gradient-to-r from-primary to-secondary hover:scale-105 transition-transform"
@@ -169,9 +170,9 @@ export default async function HomePage() {
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="absolute bottom-0 left-0 right-0 p-3">
-                      <p className="text-white text-sm font-medium">{anime.episodes} Episodes</p>
+                      <p className="text-white text-sm font-medium">{anime.episodes} {translate("Episodes")}</p>
                       <Badge variant="secondary" className="mt-1">
-                        {anime.status}
+                        {translate(anime.status)}
                       </Badge>
                     </div>
                   </div>
@@ -213,9 +214,9 @@ export default async function HomePage() {
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="absolute bottom-0 left-0 right-0 p-3">
-                      <p className="text-white text-sm font-medium">{manga.chapters} Chapters</p>
+                      <p className="text-white text-sm font-medium">{manga.chapters} {translate("Chapters")}</p>
                       <Badge variant="secondary" className="mt-1">
-                        {manga.status}
+                        {translate(manga.status)}
                       </Badge>
                     </div>
                   </div>

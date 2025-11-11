@@ -4,8 +4,8 @@ import { Facebook, Twitter, Instagram, Youtube, Github, Mail, MessageCircle, Fil
 export function Footer() {
   return (
     <footer className="border-t bg-muted/50">
-      <div className="container py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="container mx-auto py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mx-auto">
           <div>
             <h3 className="font-bold text-lg mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               Otakutrack

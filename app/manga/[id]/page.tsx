@@ -1,4 +1,5 @@
 import { getMangaById } from "@/lib/jikanApi";
+import { translate } from "@/lib/translator";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Star, Book, Calendar, Users, BarChart, PenSquare } from "lucide-react";
@@ -6,6 +7,7 @@ import AddToListButton from "@/components/AddToListButton";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import ReviewsSection from "@/components/ReviewsSection";
+import Synopsis from "@/components/Synopsis";
 
 interface MangaDetailsPageProps {
   params: {
@@ -59,20 +61,20 @@ export default async function MangaDetailsPage({ params }: MangaDetailsPageProps
             </div>
             <div className="flex items-center gap-2">
               <BarChart />
-              <span>Rank #{manga.rank || "N/A"}</span>
+              <span>{translate("Rank")} #{manga.rank || "N/A"}</span>
             </div>
             <div className="flex items-center gap-2">
               <Users />
-              <span>Pop. #{manga.popularity || "N/A"}</span>
+              <span>{translate("Pop.")} #{manga.popularity || "N/A"}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
-            <div className="flex items-center gap-2"><Book /> <strong>Tipo:</strong> {manga.type || "N/A"}</div>
-            <div className="flex items-center gap-2"><PenSquare /> <strong>Capítulos:</strong> {manga.chapters || "N/A"}</div>
-            <div className="flex items-center gap-2"><Calendar /> <strong>Publicación:</strong> {manga.published.string || "N/A"}</div>
+            <div className="flex items-center gap-2"><Book /> <strong>{translate("Type")}:</strong> {translate(manga.type) || "N/A"}</div>
+            <div className="flex items-center gap-2"><PenSquare /> <strong>{translate("Chapters")}:</strong> {manga.chapters || "N/A"}</div>
+            <div className="flex items-center gap-2"><Calendar /> <strong>{translate("Publication")}:</strong> {manga.published.string || "N/A"}</div>
             <div className="flex items-center gap-2">
-              <strong>Autores:</strong>
+              <strong>{translate("Authors")}:</strong>
               <div className="flex flex-wrap gap-1">
                 {manga.authors.map((author: any) => (
                   <Badge key={author.mal_id} variant="outline" className="text-xs">{author.name}</Badge>
@@ -81,8 +83,10 @@ export default async function MangaDetailsPage({ params }: MangaDetailsPageProps
             </div>
           </div>
 
-          <h3 className="text-2xl font-semibold border-b pb-2 mb-4">Sinopsis</h3>
-          <p className="text-muted-foreground whitespace-pre-wrap">{manga.synopsis || "No hay sinopsis disponible."}</p>
+import Synopsis from "@/components/Synopsis";
+
+          <h3 className="text-2xl font-semibold border-b pb-2 mb-4">{translate("Synopsis")}</h3>
+          <Synopsis text={manga.synopsis || "No hay sinopsis disponible."} />
 
         </div>
       </div>

@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="es" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable} dark`}>
       <body className={`font-sans antialiased`}>
         <Providers>
           <MainNav />

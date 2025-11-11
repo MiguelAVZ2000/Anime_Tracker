@@ -1,4 +1,5 @@
 import { getAnimeById } from "@/lib/jikanApi";
+import { translate } from "@/lib/translator";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Star, Tv, Calendar, Clapperboard, Book, Users, BarChart } from "lucide-react";
@@ -6,6 +7,7 @@ import AddToListButton from "@/components/AddToListButton";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import ReviewsSection from "@/components/ReviewsSection";
+import Synopsis from "@/components/Synopsis";
 
 interface AnimeDetailsPageProps {
   params: {
@@ -59,23 +61,23 @@ export default async function AnimeDetailsPage({ params }: AnimeDetailsPageProps
             </div>
             <div className="flex items-center gap-2">
               <Users />
-              <span>Popularity: {anime.popularity || "N/A"}</span>
+              <span>{translate("Popularity")}: {anime.popularity || "N/A"}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
-            <div className="flex items-center gap-2"><Tv /> <strong>Tipo:</strong> {anime.type}</div>
-            <div className="flex items-center gap-2"><Clapperboard /> <strong>Episodios:</strong> {anime.episodes || "N/A"}</div>
-            <div className="flex items-center gap-2"><Calendar /> <strong>Emisión:</strong> {anime.aired.string}</div>
-            <div className="flex items-center gap-2"><Book /> <strong>Estudios:</strong> {anime.studios[0]?.name || "N/A"}</div>
+            <div className="flex items-center gap-2"><Tv /> <strong>{translate("Type")}:</strong> {translate(anime.type)}</div>
+            <div className="flex items-center gap-2"><Clapperboard /> <strong>{translate("Episodes")}:</strong> {anime.episodes || "N/A"}</div>
+            <div className="flex items-center gap-2"><Calendar /> <strong>{translate("Aired")}:</strong> {anime.aired.string}</div>
+            <div className="flex items-center gap-2"><Book /> <strong>{translate("Studios")}:</strong> {anime.studios[0]?.name || "N/A"}</div>
           </div>
 
-          <h3 className="text-2xl font-semibold border-b pb-2 mb-4">Sinopsis</h3>
-          <p className="text-muted-foreground whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: anime.synopsis || "No hay sinopsis disponible." }}></p>
+          <h3 className="text-2xl font-semibold border-b pb-2 mb-4">{translate("Synopsis")}</h3>
+          <Synopsis text={anime.synopsis || "No hay sinopsis disponible."} />
 
           {anime.trailer?.youtube_id && (
             <div className="mt-8">
-              <h3 className="text-2xl font-semibold border-b pb-2 mb-4">Trailer</h3>
+              <h3 className="text-2xl font-semibold border-b pb-2 mb-4">{translate("Trailer")}</h3>
               <iframe
                 className="w-full aspect-video rounded-lg"
                 src={`https://www.youtube.com/embed/${anime.trailer.youtube_id}`}

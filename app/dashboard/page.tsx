@@ -43,30 +43,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Play className="h-8 w-8 text-primary" />
-              <Link href="/">
-                <h1 className="text-2xl font-bold text-foreground">AnimeTracker</h1>
-              </Link>
-            </div>
-            <nav className="flex items-center gap-4">
-              <Link href="/dashboard">
-                <Button variant="ghost">Dashboard</Button>
-              </Link>
-              <Link href="/search">
-                <Button variant="ghost">Search</Button>
-              </Link>
-              <Link href="/profile">
-                <Button variant="outline">Profile</Button>
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+
 
       <div className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
@@ -134,12 +111,12 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-primary" />
-                Total Episodes
+                Episodios Totales
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold text-foreground">{userStats.totalEpisodesWatched.toLocaleString()}</p>
-              <p className="text-sm text-muted-foreground mt-1">Episodes watched</p>
+              <p className="text-sm text-muted-foreground mt-1">Episodios vistos</p>
             </CardContent>
           </Card>
 
@@ -147,12 +124,12 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-secondary" />
-                Days Watched
+                Días Vistos
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold text-foreground">{userStats.daysWatched}</p>
-              <p className="text-sm text-muted-foreground mt-1">Days of content</p>
+              <p className="text-sm text-muted-foreground mt-1">Días de contenido</p>
             </CardContent>
           </Card>
 
@@ -160,12 +137,12 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-accent" />
-                Chapters Read
+                Capítulos Leídos
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold text-foreground">{userStats.totalChaptersRead.toLocaleString()}</p>
-              <p className="text-sm text-muted-foreground mt-1">Manga chapters</p>
+              <p className="text-sm text-muted-foreground mt-1">Capítulos de manga</p>
             </CardContent>
           </Card>
         </div>
@@ -264,11 +241,11 @@ export default async function DashboardPage() {
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <Play className="h-5 w-5 text-primary" />
-                    Currently Watching
+                    Viendo Actualmente
                   </span>
                   <Link href="/list/watching">
                     <Button variant="ghost" size="sm">
-                      View All
+                      Ver Todo
                     </Button>
                   </Link>
                 </CardTitle>
@@ -293,7 +270,7 @@ export default async function DashboardPage() {
                               {anime.rating}
                             </Badge>
                             <span className="text-sm text-muted-foreground">
-                              {anime.progress}/{anime.total} episodes
+                              {anime.progress}/{anime.total} episodios
                             </span>
                           </div>
                           <Progress value={(anime.progress / anime.total) * 100} className="h-2" />
@@ -311,11 +288,11 @@ export default async function DashboardPage() {
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <BookOpen className="h-5 w-5 text-primary" />
-                    Currently Reading
+                    Leyendo Actualmente
                   </span>
                   <Link href="/list/reading">
                     <Button variant="ghost" size="sm">
-                      View All
+                      Ver Todo
                     </Button>
                   </Link>
                 </CardTitle>
@@ -340,7 +317,7 @@ export default async function DashboardPage() {
                               {manga.rating}
                             </Badge>
                             <span className="text-sm text-muted-foreground">
-                              {manga.progress}/{manga.total} chapters
+                              {manga.progress}/{manga.total} capítulos
                             </span>
                           </div>
                           <Progress value={(manga.progress / manga.total) * 100} className="h-2" />
@@ -359,7 +336,7 @@ export default async function DashboardPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-primary" />
-                  Recent Activity
+                  Actividad Reciente
                 </CardTitle>
               </CardHeader>
               <CardContent>

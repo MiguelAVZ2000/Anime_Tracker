@@ -1,12 +1,18 @@
 const JIKAN_API_URL = "https://api.jikan.moe/v4";
 
 async function fetchJikan(endpoint: string) {
+  await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
   const response = await fetch(`${JIKAN_API_URL}${endpoint}`);
   if (!response.ok) {
     throw new Error(`Error en Jikan API: ${response.statusText}`);
   }
-  const data = await response.json();
-  return data;
+  try {
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+    throw new Error("Error parsing JSON from Jikan API");
+  }
 }
 
 export async function getSeasonNow() {

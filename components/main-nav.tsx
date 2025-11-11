@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   Bell,
   Search,
@@ -17,15 +17,15 @@ import {
   Calendar,
   Users,
   Sparkles,
-  Type,
-  Contrast,
   Trophy,
   BarChart3,
   MessageSquare,
   Download,
+  LogIn,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useSession, signOut } from "next-auth/react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,35 +40,45 @@ import { cn } from "@/lib/utils"
 
 export function MainNav() {
   const pathname = usePathname()
+  const router = useRouter()
   const { setTheme } = useTheme()
+  const { data: session, status } = useSession()
   const [isScrolled, setIsScrolled] = useState(false)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [showNav, setShowNav] = useState(true)
-  const [fontSize, setFontSize] = useState("medium")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [notificationCount, setNotificationCount] = useState(0) // Example state for notifications
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY
+      setIsScrolled(window.scrollY > 50);
+    };
 
-      setIsScrolled(currentScrollY > 10)
-
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setShowNav(false)
-      } else {
-        setShowNav(true)
-      }
-
-      setLastScrollY(currentScrollY)
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [lastScrollY])
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
-    document.documentElement.style.fontSize = fontSize === "small" ? "14px" : fontSize === "large" ? "18px" : "16px"
-  }, [fontSize])
+    let lastScrollTop = 0;
+    const handleScroll = () => {
+      const currentScrollTop = window.scrollY || document.documentElement.scrollTop;
+
+      if (currentScrollTop > lastScrollTop && currentScrollTop > 50) { // Desplazamiento hacia abajo y más allá de 50px
+        setShowNav(false);
+      } else { // Desplazamiento hacia arriba o cerca de la parte superior
+        setShowNav(true);
+      }
+      lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop; // Para evitar valores negativos
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []); // Dependencia vacía para que se ejecute una sola vez al montar
+
+  const handleNavigate = (href: string) => {
+    router.push(href)
+    setMobileMenuOpen(false)
+  }
 
   const navItems = [
     { href: "/", label: "Inicio", icon: Home },
@@ -82,13 +92,15 @@ export function MainNav() {
     { href: "/stats", label: "Estadísticas", icon: BarChart3 },
   ];
 
+  // Placeholder for user role
+  const isAdmin = session?.user?.role === 'admin';
+
   return (
     <header
       className={cn(
-        "fixed top-0 z-50 w-full transition-all duration-300",
+        "fixed top-0 z-50 w-full transition-all duration-500",
         "bg-background/80 backdrop-blur-md border-b border-border/40",
-        "shadow-sm",
-        isScrolled ? "shadow-md" : "",
+        isScrolled ? "shadow-xl" : "shadow-lg",
         showNav ? "translate-y-0" : "-translate-y-full",
       )}
     >
@@ -165,70 +177,23 @@ export function MainNav() {
                 aria-label="Notificaciones"
               >
                 <Bell className="h-4 w-4 animate-wiggle" />
-                <Badge className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px] animate-bounce">
-                  3
-                </Badge>
+                {notificationCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px] animate-bounce">
+                    {notificationCount}
+                  </Badge>
+                )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
+            <DropdownMenuContent align="end" className="w-80 z-[100]">
               <div className="flex items-center justify-between p-3">
                 <h3 className="font-semibold text-sm">Notificaciones</h3>
-                <Button variant="ghost" size="sm" className="h-7 text-xs">
+                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setNotificationCount(0)}>
                   Marcar leídas
                 </Button>
               </div>
               <DropdownMenuSeparator />
-              <Link href="/notifications">
-                <DropdownMenuItem className="p-3">
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium">Nuevo episodio disponible</p>
-                    <p className="text-xs text-muted-foreground">Attack on Titan - Episodio 25</p>
-                    <p className="text-xs text-muted-foreground">Hace 5 minutos</p>
-                  </div>
-                </DropdownMenuItem>
-              </Link>
-              <Link href="/notifications">
-                <DropdownMenuItem className="p-3">
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium">Nuevo seguidor</p>
-                    <p className="text-xs text-muted-foreground">@otaku_master comenzó a seguirte</p>
-                    <p className="text-xs text-muted-foreground">Hace 1 hora</p>
-                  </div>
-                </DropdownMenuItem>
-              </Link>
-              <DropdownMenuSeparator />
-              <Link href="/notifications">
-                <DropdownMenuItem className="justify-center text-sm">Ver todas</DropdownMenuItem>
-              </Link>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Font Size Control */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hover:bg-accent/50 hover:scale-110 transition-all"
-                aria-label="Tamaño de fuente"
-              >
-                <Type className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Tamaño de fuente</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setFontSize("small")}>
-                <Type className="mr-2 h-3 w-3" />
-                Pequeño
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFontSize("medium")}>
-                <Type className="mr-2 h-4 w-4" />
-                Mediano
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFontSize("large")}>
-                <Type className="mr-2 h-5 w-5" />
-                Grande
+              <DropdownMenuItem className="justify-center text-sm" onSelect={() => handleNavigate('/notifications')}>
+                Ver todas
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -246,7 +211,7 @@ export function MainNav() {
                 <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="z-[100]">
               <DropdownMenuLabel>Tema</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setTheme("light")}>
@@ -265,64 +230,64 @@ export function MainNav() {
           </DropdownMenu>
 
           {/* User Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hover:bg-accent/50 hover:scale-110 transition-all"
-                aria-label="Menú de usuario"
-              >
-                <User className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <Link href="/profile">
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  Mi Perfil
+          {status === 'authenticated' ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-accent/50 hover:scale-110 transition-all"
+                  aria-label="Menú de usuario"
+                >
+                  <User className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 z-[100]">
+                <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => handleNavigate('/profile')}>
+                    <User className="mr-2 h-4 w-4" />
+                    Mi Perfil
                 </DropdownMenuItem>
-              </Link>
-              <Link href="/profile/lists">
-                <DropdownMenuItem>
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Mis Listas
+                <DropdownMenuItem onSelect={() => handleNavigate('/profile/lists')}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Mis Listas
                 </DropdownMenuItem>
-              </Link>
-              <Link href="/achievements">
-                <DropdownMenuItem>
-                  <Trophy className="mr-2 h-4 w-4" />
-                  Logros
+                <DropdownMenuItem onSelect={() => handleNavigate('/achievements')}>
+                    <Trophy className="mr-2 h-4 w-4" />
+                    Logros
                 </DropdownMenuItem>
-              </Link>
-              <Link href="/stats">
-                <DropdownMenuItem>
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  Estadísticas
+                <DropdownMenuItem onSelect={() => handleNavigate('/stats')}>
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    Estadísticas
                 </DropdownMenuItem>
-              </Link>
-              <Link href="/import-export">
-                <DropdownMenuItem>
-                  <Download className="mr-2 h-4 w-4" />
-                  Importar/Exportar
+                <DropdownMenuItem onSelect={() => handleNavigate('/import-export')}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Importar/Exportar
                 </DropdownMenuItem>
-              </Link>
-              <Link href="/profile/settings">
-                <DropdownMenuItem>
-                  <Contrast className="mr-2 h-4 w-4" />
-                  Configuración
-                </DropdownMenuItem>
-              </Link>
-              <DropdownMenuSeparator />
-              <Link href="/admin">
-                <DropdownMenuItem>Panel Admin</DropdownMenuItem>
-              </Link>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">Cerrar Sesión</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuSeparator />
+                {isAdmin && (
+                  <>
+                    <DropdownMenuItem onSelect={() => handleNavigate('/admin')}>
+                      Panel Admin
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                <DropdownMenuItem onClick={() => signOut()} className="text-destructive">Cerrar Sesión</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleNavigate('/login')}
+              className="hover:bg-accent/50 hover:scale-110 transition-all"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Iniciar Sesión
+            </Button>
+          )}
 
           {/* Mobile Menu */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
