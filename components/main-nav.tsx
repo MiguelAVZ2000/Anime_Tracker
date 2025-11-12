@@ -184,7 +184,10 @@ export function MainNav() {
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 z-[100]">
+            <DropdownMenuContent 
+              align="end" 
+              className="w-80 z-[100] data-[state=closed]:hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+            >
               <div className="flex items-center justify-between p-3">
                 <h3 className="font-semibold text-sm">Notificaciones</h3>
                 <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setNotificationCount(0)}>
@@ -211,7 +214,10 @@ export function MainNav() {
                 <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="z-[100]">
+            <DropdownMenuContent 
+              align="end" 
+              className="z-[100] data-[state=closed]:hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+            >
               <DropdownMenuLabel>Tema</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setTheme("light")}>
@@ -242,7 +248,10 @@ export function MainNav() {
                   <User className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 z-[100]">
+              <DropdownMenuContent 
+              align="end" 
+              className="w-48 z-[100] data-[state=closed]:hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+            >
                 <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => handleNavigate('/profile')}>

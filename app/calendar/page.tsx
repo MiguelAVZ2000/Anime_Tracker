@@ -87,95 +87,78 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="container py-8">
+    <div className="container py-8 max-w-7xl">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold mb-2">Calendario de Estrenos</h1>
         <p className="text-muted-foreground">Descubre cuándo salen tus animes y mangas favoritos</p>
       </div>
 
-      <Tabs defaultValue="anime" className="w-full max-w-4xl mx-auto">
-        <TabsList className="grid w-full grid-cols-1">
-          <TabsTrigger value="anime">Anime Semanal</TabsTrigger>
-        </TabsList>
-
-          <TabsContent value="anime" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Anime Semanal</CardTitle>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="icon" onClick={() => setCurrentWeek(currentWeek - 1)}>
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="icon" onClick={() => setCurrentWeek(currentWeek + 1)}>
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Anime Semanal</CardTitle>
+            <div className="flex gap-2">
+              <Button variant="outline" size="icon" onClick={() => setCurrentWeek(currentWeek - 1)}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => setCurrentWeek(currentWeek + 1)}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loadingAnime && <p className="text-center text-muted-foreground py-4">Cargando calendario de anime...</p>}
+          {errorAnime && <p className="text-center text-destructive py-4">{errorAnime}</p>}
+          {!loadingAnime && !errorAnime && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {weekDays.map((day, index) => (
+                <div key={day} className="space-y-3">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    {day} - {getDayDate(index)}
+                    <Badge variant="secondary">
+                      {animeSchedule[day]?.length || 0} estrenos
+                    </Badge>
+                  </h3>
+                  <div className="space-y-3">
+                    {animeSchedule[day]?.map((anime) => (
+                      <Link key={anime.id} href={`/anime/${anime.id}`}>
+                        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                          <CardContent className="p-4">
+                            <div className="flex gap-4">
+                              <Image
+                                src={anime.image}
+                                alt={anime.title}
+                                width={64}
+                                height={90}
+                                className="w-16 h-24 object-cover rounded-md"
+                              />
+                              <div className="flex-1 space-y-1">
+                                <h4 className="font-semibold text-sm line-clamp-2">{anime.title}</h4>
+                                <div className="flex items-center gap-1 text-xs">
+                                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                  <span className="font-medium">{anime.rating}</span>
+                                </div>
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Clock className="h-3 w-3" />
+                                  <span>{anime.time}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    ))}
+                    {(!animeSchedule[day] || animeSchedule[day].length === 0) && (
+                      <p className="text-sm text-muted-foreground text-center py-4">No hay estrenos programados</p>
+                    )}
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {loadingAnime && <p className="text-center text-muted-foreground py-4">Cargando calendario de anime...</p>}
-                {errorAnime && <p className="text-center text-destructive py-4">{errorAnime}</p>}
-                {!loadingAnime && !errorAnime && (
-                  <div className="grid gap-6">
-                    {weekDays.map((day, index) => (
-                      <div key={day} className="space-y-3">
-                        <h3 className="font-semibold text-lg flex items-center gap-2">
-                          {day} - {getDayDate(index)}
-                          <Badge variant="secondary">
-                            {animeSchedule[day]?.length || 0} estrenos
-                          </Badge>
-                        </h3>
-                        <div className="grid gap-3">
-                          {animeSchedule[day]?.map((anime) => (
-                            <Link key={anime.id} href={`/anime/${anime.id}`}>
-                              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                                <CardContent className="p-4">
-                                  <div className="flex gap-4">
-                                    <Image
-                                      src={anime.image}
-                                      alt={anime.title}
-                                      width={80}
-                                      height={112}
-                                      className="w-20 h-28 object-cover rounded-md"
-                                    />
-                                    <div className="flex-1 space-y-2">
-                                      <div className="flex items-start justify-between">
-                                        <div>
-                                          <h4 className="font-semibold">{anime.title}</h4>
-                                          <p className="text-sm text-muted-foreground">Episodio {anime.episode}</p>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                          <span className="text-sm font-medium">{anime.rating}</span>
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                        <Clock className="h-4 w-4" />
-                                        <span>{anime.time}</span>
-                                      </div>
-                                      <Button size="sm" className="w-full">
-                                        Añadir Recordatorio
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </Link>
-                          ))}
-                          {(!animeSchedule[day] || animeSchedule[day].length === 0) && (
-                            <p className="text-sm text-muted-foreground text-center py-4">No hay estrenos programados</p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

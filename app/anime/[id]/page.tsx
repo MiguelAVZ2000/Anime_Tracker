@@ -8,6 +8,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import ReviewsSection from "@/components/ReviewsSection";
 import Synopsis from "@/components/Synopsis";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface AnimeDetailsPageProps {
   params: {
@@ -32,64 +33,84 @@ export default async function AnimeDetailsPage({ params }: AnimeDetailsPageProps
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-1">
-          <Image
-            src={anime.images.jpg.large_image_url}
-            alt={anime.title}
-            width={350}
-            height={500}
-            className="rounded-lg shadow-lg w-full"
-          />
-          {session?.user && <AddToListButton media={mediaDataForList} mediaType="anime" />}
-        </div>
-        <div className="md:col-span-2">
-          <h1 className="text-4xl font-bold mb-2">{anime.title}</h1>
-          <h2 className="text-xl text-muted-foreground mb-4">{anime.title_japanese}</h2>
-
-          <div className="flex flex-wrap gap-2 mb-6">
-            {anime.genres.map((genre: any) => (
-              <Badge key={genre.mal_id} variant="secondary">{genre.name}</Badge>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-6 mb-6 text-lg">
-            <div className="flex items-center gap-2 font-bold">
-              <Star className="text-yellow-400" />
-              <span>{anime.score || "N/A"}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users />
-              <span>{translate("Popularity")}: {anime.popularity || "N/A"}</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
-            <div className="flex items-center gap-2"><Tv /> <strong>{translate("Type")}:</strong> {translate(anime.type)}</div>
-            <div className="flex items-center gap-2"><Clapperboard /> <strong>{translate("Episodes")}:</strong> {anime.episodes || "N/A"}</div>
-            <div className="flex items-center gap-2"><Calendar /> <strong>{translate("Aired")}:</strong> {anime.aired.string}</div>
-            <div className="flex items-center gap-2"><Book /> <strong>{translate("Studios")}:</strong> {anime.studios[0]?.name || "N/A"}</div>
-          </div>
-
-          <h3 className="text-2xl font-semibold border-b pb-2 mb-4">{translate("Synopsis")}</h3>
-          <Synopsis text={anime.synopsis || "No hay sinopsis disponible."} />
-
-          {anime.trailer?.youtube_id && (
-            <div className="mt-8">
-              <h3 className="text-2xl font-semibold border-b pb-2 mb-4">{translate("Trailer")}</h3>
-              <iframe
-                className="w-full aspect-video rounded-lg"
-                src={`https://www.youtube.com/embed/${anime.trailer.youtube_id}`}
-                title="YouTube video player"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            </div>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <Card className="overflow-hidden">
+        <div className="relative h-48 md:h-64 w-full">
+          {anime.trailer?.images?.maximum_image_url ? (
+            <Image
+              src={anime.trailer.images.maximum_image_url}
+              alt={`Trailer for ${anime.title}`}
+              layout="fill"
+              objectFit="cover"
+              className="opacity-30"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/20 to-background" />
           )}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent" />
         </div>
-      </div>
+        <CardContent className="p-6 md:p-8 -mt-24 md:-mt-32 relative z-10">
+          <div className="grid md:grid-cols-4 gap-6 md:gap-8">
+            <div className="md:col-span-1">
+              <div className="sticky top-24">
+                <Image
+                  src={anime.images.jpg.large_image_url}
+                  alt={anime.title}
+                  width={350}
+                  height={500}
+                  className="rounded-lg shadow-lg w-full"
+                />
+                {session?.user && <AddToListButton media={mediaDataForList} mediaType="anime" />}
+              </div>
+            </div>
+            <div className="md:col-span-3">
+              <h1 className="text-4xl font-bold mb-2">{anime.title}</h1>
+              <h2 className="text-xl text-muted-foreground mb-4">{anime.title_japanese}</h2>
+
+              <div className="flex flex-wrap gap-2 mb-6">
+                {anime.genres.map((genre: any) => (
+                  <Badge key={genre.mal_id} variant="secondary">{genre.name}</Badge>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-6 mb-6 text-lg">
+                <div className="flex items-center gap-2 font-bold">
+                  <Star className="text-yellow-400" />
+                  <span>{anime.score || "N/A"}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users />
+                  <span>{translate("Popularity")}: {anime.popularity || "N/A"}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+                <div className="flex items-center gap-2"><Tv /> <strong>{translate("Type")}:</strong> {translate(anime.type)}</div>
+                <div className="flex items-center gap-2"><Clapperboard /> <strong>{translate("Episodes")}:</strong> {anime.episodes || "N/A"}</div>
+                <div className="flex items-center gap-2"><Calendar /> <strong>{translate("Aired")}:</strong> {anime.aired.string}</div>
+                <div className="flex items-center gap-2"><Book /> <strong>{translate("Studios")}:</strong> {anime.studios[0]?.name || "N/A"}</div>
+              </div>
+
+              <h3 className="text-2xl font-semibold border-b pb-2 mb-4">{translate("Synopsis")}</h3>
+              <Synopsis text={anime.synopsis || "No hay sinopsis disponible."} />
+
+              {anime.trailer?.youtube_id && (
+                <div className="mt-8">
+                  <h3 className="text-2xl font-semibold border-b pb-2 mb-4">{translate("Trailer")}</h3>
+                  <iframe
+                    className="w-full aspect-video rounded-lg"
+                    src={`https://www.youtube.com/embed/${anime.trailer.youtube_id}`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <ReviewsSection mediaId={anime.mal_id} mediaType="anime" />
     </div>
